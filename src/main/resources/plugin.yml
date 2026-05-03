@@ -1,0 +1,26 @@
+name: PotionCombine
+version: ${version}
+main: dev.wndrxz.potioncombine.PotionCombine
+api-version: '1.20'
+folia-supported: false
+authors: [wndrxz]
+description: Shapeless potion brewing in vanilla cauldrons.
+
+# PAPI is optional — the expansion is registered only if it is on the server.
+softdepend: [PlaceholderAPI]
+
+commands:
+  potioncombine:
+    description: Root command for PotionCombine.
+    usage: /<command> <reload|give|help|info>
+
+permissions:
+  potioncombine.use:
+    description: Use player-facing commands (help, future journal/stats).
+    default: true
+  potioncombine.admin:
+    description: Reload config, give result items, inspect cauldrons.
+    default: op
+  potioncombine.cooldown.bypass:
+    description: Skip the per-player brew cooldown.
+    default: op
