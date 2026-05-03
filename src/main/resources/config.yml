@@ -1,0 +1,171 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# PotionCombine 1.1.0
+#
+# This file is laid out top-to-bottom in the order you'll probably tweak it:
+#   settings   — language, cooldowns, world filter, notifications
+#   brewing    — timings, sludge and spoil materials, break-stage drops
+#   automation — hopper auto-extract
+#   heat       — what counts as a heat source under the cauldron
+#   sounds     — every sound key the plugin plays
+#   display    — visuals, progress bar template, particle bursts
+#   pollution  — grime mechanic (OFF by default, flip enabled to true)
+#   cleaning   — brush rules for the pollution mechanic
+#
+# Every feature is a toggle. Out of the box this config is tuned for "I
+# just installed it, let me see the brewing in action" — pollution and the
+# cooldown are off, the hopper extract is off, heat sources give friendly
+# bonuses. Read the comments next to each value before you change it.
+# ─────────────────────────────────────────────────────────────────────────────
+
+settings:
+  # 'auto' resolves to the JVM default language, falls back to en.
+  locale: auto
+  # Recipes above this index are ignored with a load-time warning.
+  max_recipes: 20
+  # Ticks of silence after the last insert before the matcher fires.
+  grace_period_ticks: 20
+  # Shift-RMB pulls the last inserted item back. False locks items in.
+  ingredient_retrieval: true
+  # Per-player cooldown between brew starts (seconds). 0 disables it.
+  # Players with potioncombine.cooldown.bypass walk past it.
+  cooldown_seconds: 0
+  # How far around a cauldron failure / spoil / break messages reach.
+  # 0 = silent broadcast (only the direct brewer is messaged).
+  notify_radius_blocks: 16
+  # Optional per-world gate.
+  #   mode: whitelist — only listed worlds get the plugin
+  #   mode: blacklist — every world except listed ones
+  # Empty list = every world. Names match World.getName() (case-insensitive).
+  worlds:
+    mode: blacklist
+    list: []
+  # Reserved for a future paid tier. Today it does nothing. Leave false.
+  premium: false
+
+brewing:
+  # Default brew time when a recipe does not override it (ticks).
+  default_brew_time_ticks: 200
+  # How long a finished potion hovers before it spoils. 0 disables spoiling.
+  overbrew_time_seconds: 60
+  # Material the hovering item turns into on spoil. AIR makes it vanish.
+  spoil_material: ROTTEN_FLESH
+  # When a brew fails (dead-end recipe / water removed), ingredients become
+  # this item. Set to AIR to delete them silently.
+  sludge_material: ROTTEN_FLESH
+  sludge_display_name: "&8&oAlchemical Sludge"
+  # Looping bubble-sound interval during a live brew.
+  bubble_sound_interval_ticks: 14
+  # When someone breaks the cauldron mid-brew, what falls out depends on
+  # how close to ready the brew was. Three stages:
+  #   progress < early_until           → drop the raw ingredients back
+  #   between early_until and late_from → drop sludge (sludge_material above)
+  #   progress >= late_from            → drop a single "unfinished" bottle
+  # READY or SPOILED cauldrons drop their actual ready item (the potion or
+  # the spoil material).
+  break_stages:
+    early_until: 0.25
+    late_from:   0.75
+    late_bottle_material: POTION
+    late_bottle_name: "&7&oUnfinished brew"
+
+automation:
+  # Drop a vanilla hopper directly under the cauldron and finished potions
+  # are pulled into it automatically. Spoiled brews are never auto-pulled —
+  # operators tend to want to see those.
+  hopper_extract: false
+
+heat:
+  # Heat sources sit directly under the cauldron and help the brewer:
+  #   brew_time_multiplier < 1.0 → faster brew
+  #   pollution_resist     0..1  → softens the pollution-driven spoil roll
+  # 'require_lit: true' means a put-out campfire counts as nothing.
+  enabled: true
+  require_lit: true
+  sources:
+    CAMPFIRE:      { brew_time_multiplier: 0.85, pollution_resist: 0.00 }
+    SOUL_CAMPFIRE: { brew_time_multiplier: 0.75, pollution_resist: 0.20 }
+    MAGMA_BLOCK:   { brew_time_multiplier: 0.90, pollution_resist: 0.00 }
+    FIRE:          { brew_time_multiplier: 0.85, pollution_resist: 0.00 }
+    LAVA:          { brew_time_multiplier: 0.70, pollution_resist: 0.30 }
+
+sounds:
+  # Every entry is a raw string so resource pack namespaces work too,
+  # e.g. "myresourcepack:alchemy.bubble". Empty string means silent.
+  ingredient_insert:   minecraft:entity.item.pickup
+  ingredient_reject:   minecraft:entity.villager.no
+  ingredient_retrieve: minecraft:entity.item.pickup
+  brew_bubble:         minecraft:block.brewing_stand.brew
+  brew_success:        minecraft:entity.player.levelup
+  brew_fail:           minecraft:block.glass.break
+  spoil:               minecraft:block.fire.extinguish
+  cleaning_brush:      minecraft:item.brush.brushing.generic
+  pollution_idle:      ""
+  cauldron_broken:     minecraft:block.cauldron.empty
+
+display:
+  # Y offset above the cauldron block for the floating display entity.
+  y_offset: 1.05
+  # Spin speed of the finished item display, in radians per tick.
+  result_spin_per_tick: 0.06
+  # The progress bar shown during brewing. Fully editable from here.
+  progress:
+    bar_width: 16
+    # Show the recipe name (from brew.started in your lang file) above
+    # the bar. Set false for a bare progress display.
+    show_header: true
+    # Character used for filled and empty segments. They can differ.
+    filled_char: "|"
+    empty_char: "|"
+    # MiniMessage template. Tokens: <filled>, <empty>, <percent>.
+    template: "<dark_gray>[<gradient:#7a4cff:#22d3ee><filled></gradient><dark_gray><empty>] <gray><percent>%"
+
+  # Particle bursts per event. 'enabled: false' turns off every burst at once.
+  # Names follow Bukkit's Particle enum — both the 1.20 (VILLAGER_HAPPY) and
+  # 1.21 (HAPPY_VILLAGER) spellings work; whichever the server has wins.
+  particles:
+    enabled: true
+    events:
+      insert:
+        - { name: POOF,        count: 6,  offset_x: 0.20, offset_y: 0.10, offset_z: 0.20, speed: 0.01 }
+      brewing_bubble:
+        - { name: BUBBLE_POP,  count: 6,  offset_x: 0.20, offset_y: 0.10, offset_z: 0.20, speed: 0.05 }
+      brew_start:
+        - { name: WITCH,       count: 12, offset_x: 0.40, offset_y: 0.30, offset_z: 0.40, speed: 0.02 }
+      brew_success:
+        - { name: HAPPY,       count: 24, offset_x: 0.45, offset_y: 0.40, offset_z: 0.45, speed: 0.00 }
+      brew_fail:
+        - { name: LARGE_SMOKE, count: 18, offset_x: 0.35, offset_y: 0.20, offset_z: 0.35, speed: 0.02 }
+      collect:
+        - { name: POOF,        count: 8,  offset_x: 0.20, offset_y: 0.20, offset_z: 0.20, speed: 0.00 }
+      pollution_idle:
+        - { name: LARGE_SMOKE, count: 2,  offset_x: 0.18, offset_y: 0.10, offset_z: 0.18, speed: 0.005 }
+      cleaning_brush:
+        - { name: POOF,        count: 8,  offset_x: 0.25, offset_y: 0.15, offset_z: 0.25, speed: 0.01 }
+
+pollution:
+  # Off by default. Flip enabled to true once you want consequences. When
+  # disabled, none of the values below matter — no idle particles, no
+  # threshold checks, nothing. Pure 1.0 behaviour.
+  enabled: false
+  # Threshold at which the cauldron refuses new ingredients.
+  threshold: 15
+  # How much pollution each outcome adds.
+  per_success: 1
+  per_fail: 2
+  per_spoil: 3
+  # Each point adds this much to the spoil-on-start roll. 0 disables.
+  # 0.01 = +1% per point, so a maxed (15) cauldron has a 15% spoil chance.
+  spoil_chance_per_point: 0.01
+  # Each point multiplies brew time by this fraction on top of 1.0.
+  # 0 = no slowdown, 0.05 = +5% per point.
+  brew_time_factor_per_point: 0.0
+
+cleaning:
+  # Right-click a polluted cauldron with a vanilla brush to scrub it.
+  # Has no effect when pollution is disabled.
+  enabled: true
+  per_brush_click: 2
+  # Filling an empty cauldron with a water bucket wipes pollution too.
+  reset_on_water_refill: true
+  # Whether brushing actually damages the brush (creative players skip this).
+  consume_brush_durability: true
