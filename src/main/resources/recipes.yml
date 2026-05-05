@@ -1,0 +1,107 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# PotionCombine — recipes
+#
+# The first recipe below (simple_glow) uses the most basic materials a player
+# can find in five minutes. Run /pc give <you> simple_glow to verify the
+# plugin works, or actually brew it: drop a piece of redstone and one
+# glowstone dust into a water cauldron, shift-LMB each in, wait, right-click.
+#
+# Schema:
+#   <recipe_id>:
+#     display_name: "&aDisplay name"     # legacy & codes accepted
+#     lore:                               # optional, list of strings
+#       - "&7Line one"
+#     brew_time_ticks: 200                # optional, falls back to default
+#     color: "#a020f0"                    # optional, hex potion liquid colour
+#     base_potion: AWKWARD                # optional base PotionType
+#     ingredients:                        # list of items, at least one
+#       - { material: REDSTONE, amount: 1 }
+#       - { material: GLOWSTONE_DUST }
+#       - { material: POTION, potion_type: HEALING }
+#       - { recipe: phoenix_elixir }     # another of your recipes as ingredient
+#     effects:                            # custom PotionEffect entries
+#       - { type: STRENGTH, duration: 1800, amplifier: 1 }
+#
+# Delete the bundled recipes once you've designed your own — there's nothing
+# special about them, they're just a test set.
+# ─────────────────────────────────────────────────────────────────────────────
+
+simple_glow:
+  display_name: "&aGlow Brew"
+  lore:
+    - "&7A starter brew. Two ingredients, fast."
+    - "&7Right-click the cauldron once it's ready."
+  brew_time_ticks: 100
+  color: "#a0ffa0"
+  base_potion: AWKWARD
+  ingredients:
+    - { material: REDSTONE }
+    - { material: GLOWSTONE_DUST }
+  effects:
+    - { type: NIGHT_VISION, duration: 1800, amplifier: 0 }
+    - { type: SPEED,        duration: 1200, amplifier: 0 }
+
+phoenix_elixir:
+  display_name: "&6Phoenix &cElixir"
+  lore:
+    - "&7Warm to the touch."
+  brew_time_ticks: 180
+  color: "#ff7a1c"
+  base_potion: AWKWARD
+  ingredients:
+    - { material: BLAZE_POWDER, amount: 2 }
+    - { material: GUNPOWDER }
+    - { material: REDSTONE }
+  effects:
+    - { type: FIRE_RESISTANCE, duration: 4800, amplifier: 0 }
+    - { type: STRENGTH,        duration: 1800, amplifier: 0 }
+
+drowned_tear:
+  display_name: "&bDrowned Tear"
+  lore:
+    - "&7Heavy in the hand."
+  brew_time_ticks: 200
+  color: "#1c6aff"
+  base_potion: AWKWARD
+  ingredients:
+    - { material: PUFFERFISH }
+    - { material: PRISMARINE_CRYSTALS, amount: 2 }
+    - { material: GLOWSTONE_DUST }
+  effects:
+    - { type: WATER_BREATHING, duration: 6000, amplifier: 0 }
+    - { type: NIGHT_VISION,    duration: 6000, amplifier: 0 }
+
+ashen_brew:
+  display_name: "&8Ashen &7Brew"
+  lore:
+    - "&7Smells of cold cinders."
+  brew_time_ticks: 220
+  color: "#3a3a3a"
+  base_potion: AWKWARD
+  ingredients:
+    - { material: CHARCOAL, amount: 2 }
+    - { material: WITHER_ROSE }
+    - { material: REDSTONE }
+  effects:
+    - { type: SLOW_FALLING, duration: 2400, amplifier: 0 }
+    - { type: RESISTANCE,   duration: 1200, amplifier: 0 }
+
+# Tier-2: uses a finished phoenix_elixir as an ingredient. Brew the elixir
+# first, then drop the bottle back into a fresh cauldron with ghast tear
+# and glowstone dust.
+phoenix_crown:
+  display_name: "&e&lPhoenix Crown"
+  lore:
+    - "&7Burns brighter than the sun."
+    - "&8Requires a Phoenix Elixir."
+  brew_time_ticks: 320
+  color: "#ffd24a"
+  base_potion: AWKWARD
+  ingredients:
+    - { recipe: phoenix_elixir }
+    - { material: GHAST_TEAR }
+    - { material: GLOWSTONE_DUST, amount: 2 }
+  effects:
+    - { type: FIRE_RESISTANCE, duration: 9600, amplifier: 0 }
+    - { type: STRENGTH,        duration: 3600, amplifier: 1 }
+    - { type: REGENERATION,    duration: 1200, amplifier: 0 }
