@@ -12,6 +12,7 @@ softdepend: [PlaceholderAPI]
 commands:
   potioncombine:
     description: Root command for PotionCombine.
+    aliases: [pc, pcombine]
     usage: /<command> <reload|give|help|info>
 
 permissions:
