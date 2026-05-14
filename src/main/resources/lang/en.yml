@@ -1,0 +1,53 @@
+# MiniMessage strings. <recipe>, <player>, <amount>, etc. are placeholders.
+prefix: "<dark_gray>[<gradient:#7a4cff:#22d3ee>PotionCombine</gradient><dark_gray>]</dark_gray> "
+
+cauldron:
+  empty_no_water: "<gray>The cauldron is empty. Fill it with water first."
+  not_whitelisted: "<red>That item cannot go into the cauldron."
+  added: "<gray>Added <white><item></white> to the cauldron."
+  retrieved: "<gray>Took <white><item></white> back from the cauldron."
+  retrieve_none: "<gray>Nothing to take back."
+  retrieve_locked: "<red>The brew has already started."
+  collect_success: "<green>Collected <white><recipe></white>."
+  collect_inventory_full: "<yellow>Your inventory is full — the potion fell to your feet."
+  too_polluted: "<red>The cauldron is too dirty. Scrub it with a brush before brewing."
+  cooldown: "<red>Wait <white><seconds>s</white> before brewing again."
+
+brew:
+  started: "<gray>The cauldron begins to bubble — <white><recipe></white>."
+  finished: "<green>The brew is ready: <white><recipe></white>."
+  failed_dead_end: "<red>Those ingredients cannot become a recipe."
+  failed_water_lost: "<red>The water is gone. The brew failed."
+  failed_incomplete: "<red>Recipe incomplete — the brew failed."
+  failed_polluted: "<red>The grime in the cauldron ruined the brew."
+  spoiled: "<dark_gray>The potion has spoiled."
+  cauldron_broken: "<red>A brewing cauldron has been broken."
+
+cleaning:
+  cleared: "<green>The cauldron is clean again."
+  progress: "<gray>Scrubbing… <white><level></white><dark_gray>/<white><threshold></white>."
+
+command:
+  unknown: "<red>Unknown subcommand. Try <white>/potioncombine help</white>."
+  no_permission: "<red>You don't have permission for that."
+  player_only: "<red>That command is for players."
+  reloaded: "<green>Configuration and recipes reloaded."
+  give_usage: "<gray>Usage: <white>/potioncombine give <player> <recipe_id> [amount]</white>"
+  give_player_not_found: "<red>Player not found: <white><player></white>."
+  give_recipe_not_found: "<red>Unknown recipe: <white><recipe></white>."
+  give_success: "<green>Gave <white><amount>x <recipe></white> to <white><player></white>."
+  help_header: "<dark_gray>--- <gradient:#7a4cff:#22d3ee>PotionCombine</gradient> <dark_gray>---"
+  help_reload: "<gray>/potioncombine reload <dark_gray>— reload config + recipes"
+  help_give: "<gray>/potioncombine give <player> <recipe_id> [amount] <dark_gray>— spawn a finished potion"
+  help_help: "<gray>/potioncombine help <dark_gray>— this list"
+  help_info: "<gray>/potioncombine info <dark_gray>— version, recipe count, hooks"
+  info_version: "<gray>Version: <white><version></white>"
+  info_recipes: "<gray>Recipes loaded: <white><count></white>"
+  info_brews:   "<gray>Active brews: <white><count></white>"
+  info_papi:    "<gray>PlaceholderAPI: <white><state></white>"
+
+startup:
+  locale_resolved: "Locale resolved to '<locale>'."
+  recipes_loaded: "Loaded <count> recipe(s) from recipes.yml."
+  recipes_capped: "recipes.yml has more than <max> entries — only the first <max> were loaded."
+  recipe_invalid: "Skipping invalid recipe '<id>': <reason>"

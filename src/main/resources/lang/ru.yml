@@ -1,0 +1,52 @@
+prefix: "<dark_gray>[<gradient:#7a4cff:#22d3ee>PotionCombine</gradient><dark_gray>]</dark_gray> "
+
+cauldron:
+  empty_no_water: "<gray>Котёл пуст. Сначала залейте воду."
+  not_whitelisted: "<red>Этот предмет нельзя бросить в котёл."
+  added: "<gray>Добавлено в котёл: <white><item></white>."
+  retrieved: "<gray>Вы забрали обратно: <white><item></white>."
+  retrieve_none: "<gray>Забирать нечего."
+  retrieve_locked: "<red>Варка уже началась."
+  collect_success: "<green>Получено: <white><recipe></white>."
+  collect_inventory_full: "<yellow>Инвентарь полон — зелье упало под ноги."
+  too_polluted: "<red>Котёл слишком грязный. Сначала вычистите его кистью."
+  cooldown: "<red>Подождите <white><seconds> с</white>, прежде чем варить снова."
+
+brew:
+  started: "<gray>Котёл закипает — <white><recipe></white>."
+  finished: "<green>Зелье готово: <white><recipe></white>."
+  failed_dead_end: "<red>Из этих ингредиентов рецепт не сложится."
+  failed_water_lost: "<red>Воды не стало. Варка сорвалась."
+  failed_incomplete: "<red>Рецепт неполный — варка сорвалась."
+  failed_polluted: "<red>Грязь в котле испортила варку."
+  spoiled: "<dark_gray>Зелье испортилось."
+  cauldron_broken: "<red>Варочный котёл был разрушен."
+
+cleaning:
+  cleared: "<green>Котёл снова чистый."
+  progress: "<gray>Чистим… <white><level></white><dark_gray>/<white><threshold></white>."
+
+command:
+  unknown: "<red>Неизвестная подкоманда. Попробуйте <white>/potioncombine help</white>."
+  no_permission: "<red>Недостаточно прав."
+  player_only: "<red>Команда только для игроков."
+  reloaded: "<green>Конфиг и рецепты перезагружены."
+  give_usage: "<gray>Использование: <white>/potioncombine give <player> <recipe_id> [amount]</white>"
+  give_player_not_found: "<red>Игрок не найден: <white><player></white>."
+  give_recipe_not_found: "<red>Неизвестный рецепт: <white><recipe></white>."
+  give_success: "<green>Выдано <white><amount>x <recipe></white> игроку <white><player></white>."
+  help_header: "<dark_gray>--- <gradient:#7a4cff:#22d3ee>PotionCombine</gradient> <dark_gray>---"
+  help_reload: "<gray>/potioncombine reload <dark_gray>— перезагрузить конфиг и рецепты"
+  help_give: "<gray>/potioncombine give <player> <recipe_id> [amount] <dark_gray>— выдать готовое зелье"
+  help_help: "<gray>/potioncombine help <dark_gray>— этот список"
+  help_info: "<gray>/potioncombine info <dark_gray>— версия, число рецептов, хуки"
+  info_version: "<gray>Версия: <white><version></white>"
+  info_recipes: "<gray>Загружено рецептов: <white><count></white>"
+  info_brews:   "<gray>Активных варок: <white><count></white>"
+  info_papi:    "<gray>PlaceholderAPI: <white><state></white>"
+
+startup:
+  locale_resolved: "Локаль выбрана: '<locale>'."
+  recipes_loaded: "Загружено рецептов: <count> (recipes.yml)."
+  recipes_capped: "В recipes.yml больше <max> рецептов — загружены только первые <max>."
+  recipe_invalid: "Пропущен рецепт '<id>': <reason>"
