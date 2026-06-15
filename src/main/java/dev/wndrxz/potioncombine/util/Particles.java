@@ -13,7 +13,7 @@ import org.bukkit.World;
  */
 public final class Particles {
 
-    public static final Particle WITCH      = first("WITCH");
+    public static final Particle WITCH      = first("WITCH", "SPELL_WITCH");
     public static final Particle BUBBLE_POP = first("BUBBLE_POP");
     public static final Particle HAPPY      = first("HAPPY_VILLAGER", "VILLAGER_HAPPY");
     public static final Particle DUST       = first("DUST", "REDSTONE");

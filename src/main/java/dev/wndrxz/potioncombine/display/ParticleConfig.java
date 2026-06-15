@@ -18,19 +18,20 @@ public final class ParticleConfig {
 
     public record Spec(Particle particle, int count, double dx, double dy, double dz, double speed) {}
 
- private static final Map<String, String[]> ALIASES = Map.ofEntries(
-    Map.entry("WITCH",            new String[]{"WITCH"}),
-    Map.entry("BUBBLE_POP",       new String[]{"BUBBLE_POP"}),
-    Map.entry("HAPPY",            new String[]{"HAPPY_VILLAGER", "VILLAGER_HAPPY"}),
-    Map.entry("HAPPY_VILLAGER",   new String[]{"HAPPY_VILLAGER", "VILLAGER_HAPPY"}),
-    Map.entry("VILLAGER_HAPPY",   new String[]{"HAPPY_VILLAGER", "VILLAGER_HAPPY"}),
-    Map.entry("LARGE_SMOKE",      new String[]{"LARGE_SMOKE", "SMOKE_LARGE"}),
-    Map.entry("SMOKE_LARGE",      new String[]{"LARGE_SMOKE", "SMOKE_LARGE"}),
-    Map.entry("POOF",             new String[]{"POOF", "EXPLOSION_NORMAL"}),
-    Map.entry("EXPLOSION_NORMAL", new String[]{"POOF", "EXPLOSION_NORMAL"}),
-    Map.entry("DUST",             new String[]{"DUST", "REDSTONE"}),
-    Map.entry("REDSTONE",         new String[]{"DUST", "REDSTONE"})
-);
+    private static final Map<String, String[]> ALIASES = Map.ofEntries(
+            Map.entry("WITCH",            new String[]{"WITCH", "SPELL_WITCH"}),
+            Map.entry("SPELL_WITCH",      new String[]{"WITCH", "SPELL_WITCH"}),
+            Map.entry("BUBBLE_POP",       new String[]{"BUBBLE_POP"}),
+            Map.entry("HAPPY",            new String[]{"HAPPY_VILLAGER", "VILLAGER_HAPPY"}),
+            Map.entry("HAPPY_VILLAGER",   new String[]{"HAPPY_VILLAGER", "VILLAGER_HAPPY"}),
+            Map.entry("VILLAGER_HAPPY",   new String[]{"HAPPY_VILLAGER", "VILLAGER_HAPPY"}),
+            Map.entry("LARGE_SMOKE",      new String[]{"LARGE_SMOKE", "SMOKE_LARGE"}),
+            Map.entry("SMOKE_LARGE",      new String[]{"LARGE_SMOKE", "SMOKE_LARGE"}),
+            Map.entry("POOF",             new String[]{"POOF", "EXPLOSION_NORMAL"}),
+            Map.entry("EXPLOSION_NORMAL", new String[]{"POOF", "EXPLOSION_NORMAL"}),
+            Map.entry("DUST",             new String[]{"DUST", "REDSTONE"}),
+            Map.entry("REDSTONE",         new String[]{"DUST", "REDSTONE"})
+    );
 
     private boolean enabled = true;
     private final Map<String, List<Spec>> events = new HashMap<>();
