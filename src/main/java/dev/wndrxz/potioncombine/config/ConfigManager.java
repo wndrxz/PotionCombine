@@ -78,6 +78,9 @@ public final class ConfigManager {
 
     private boolean hopperExtractEnabled = false;
 
+    private boolean synergyEnabled = false;
+    private int     synergyMaxHoldSeconds = 30;
+
     public ConfigManager(PotionCombine plugin) {
         this.plugin = plugin;
     }
@@ -145,6 +148,9 @@ public final class ConfigManager {
         cleaningConsumesBrushDurability = root.getBoolean("cleaning.consume_brush_durability", true);
 
         hopperExtractEnabled = root.getBoolean("automation.hopper_extract", false);
+
+        synergyEnabled        = root.getBoolean("synergy.enabled", false);
+        synergyMaxHoldSeconds = Math.max(0, root.getInt("synergy.max_hold_seconds", 30));
 
         if (plugin.heatSourceManager() != null) {
             plugin.heatSourceManager().load(root.getConfigurationSection("heat"));
@@ -252,4 +258,7 @@ public final class ConfigManager {
     public boolean cleaningConsumesBrushDurability() { return cleaningConsumesBrushDurability; }
 
     public boolean hopperExtractEnabled() { return hopperExtractEnabled; }
+
+    public boolean synergyEnabled() { return synergyEnabled; }
+    public int synergyMaxHoldSeconds() { return synergyMaxHoldSeconds; }
 }

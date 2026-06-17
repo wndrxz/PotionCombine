@@ -28,6 +28,7 @@ public final class CauldronSession {
     private UUID itemDisplayId;
     private long lastInsertTick;
     private double progressFraction; // 0.0 at brew start, 1.0 at finish
+    private long holdingSinceMillis; // 0 = not holding for an upstream brew
 
     public CauldronSession(BlockKey location) {
         this.location = location;
@@ -75,4 +76,7 @@ public final class CauldronSession {
 
     public double progressFraction() { return progressFraction; }
     public void progressFraction(double f) { this.progressFraction = f; }
+
+    public long holdingSinceMillis() { return holdingSinceMillis; }
+    public void holdingSinceMillis(long t) { this.holdingSinceMillis = t; }
 }

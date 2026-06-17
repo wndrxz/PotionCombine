@@ -147,6 +147,17 @@ public final class BrewingTask extends BukkitRunnable {
             return;
         }
 
+        // No hopper took it — see if an adjacent cauldron is waiting on this
+        // result to finish a higher-tier recipe. If so the bottle pours
+        // straight in instead of hovering.
+        if (plugin.synergyManager().feed(world,
+                centre.getBlockX(), centre.getBlockY(), centre.getBlockZ(), recipe, result)) {
+            plugin.cauldronManager().cancelAllTasks(session);
+            plugin.cauldronManager().remove(session.location());
+            cancel();
+            return;
+        }
+
         java.util.UUID itemId = plugin.displayManager().spawnItem(dispLoc, result);
         session.itemDisplayId(itemId);
 

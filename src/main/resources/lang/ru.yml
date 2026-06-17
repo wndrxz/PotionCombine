@@ -21,6 +21,8 @@ brew:
   failed_polluted: "<red>Грязь в котле испортила варку."
   spoiled: "<dark_gray>Зелье испортилось."
   cauldron_broken: "<red>Варочный котёл был разрушен."
+  chained: "<gray><white><recipe></white> переливается в соседний котёл."
+  waiting: "<gray>Котёл ждёт варку по соседству."
 
 cleaning:
   cleared: "<green>Котёл снова чистый."

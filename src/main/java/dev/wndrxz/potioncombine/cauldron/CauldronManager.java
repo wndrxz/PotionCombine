@@ -92,6 +92,13 @@ public final class CauldronManager {
             World use = w != null ? w : fallback;
             if (use == null) continue;
             Location at = k.toCenter(use);
+            if (s.state() == CauldronSession.State.READY || s.state() == CauldronSession.State.SPOILED) {
+                ItemStack ready = s.readyItem();
+                if (ready != null && ready.getType() != Material.AIR) {
+                    use.dropItem(at, ready.clone());
+                }
+                continue;
+            }
             ItemStack ing;
             while ((ing = s.popIngredient()) != null) {
                 use.dropItem(at, ing);

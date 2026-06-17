@@ -39,6 +39,8 @@ public final class BrewingService {
     }
 
     public void onIngredientAdded(CauldronSession session, Player adder) {
+        // A fresh ingredient is progress — restart any upstream-wait patience.
+        session.holdingSinceMillis(0L);
         ItemMatcher matcher = plugin.itemMatcher();
         Map<IngredientKey, Integer> counts = matcher.countItems(session.ingredientsSnapshot());
         ItemMatcher.MatchResult res = matcher.matchKeys(counts, plugin.recipeManager().all());
@@ -63,9 +65,48 @@ public final class BrewingService {
 
         switch (res.result) {
             case MATCH    -> startBrew(session, res.matched, adder);
-            case PARTIAL  -> failBrew(session, FailureReason.INCOMPLETE, adder);
+            case PARTIAL  -> {
+                if (tryHoldForUpstream(session, counts, adder)) return;
+                failBrew(session, FailureReason.INCOMPLETE, adder);
+            }
             case NO_MATCH -> failBrew(session, FailureReason.DEAD_END,   adder);
         }
+    }
+
+    /** A downstream cauldron that is short exactly an upstream brew's output
+     *  should not fail the instant its grace runs out — the upstream may
+     *  still be cooking. While a neighbour is brewing, re-check each grace
+     *  period up to the configured ceiling, then give up and let the caller
+     *  fail it normally. Returns true while the hold is still in effect. */
+    private boolean tryHoldForUpstream(CauldronSession session,
+                                       Map<IngredientKey, Integer> counts,
+                                       Player adder) {
+        int maxSeconds = plugin.configManager().synergyMaxHoldSeconds();
+        if (maxSeconds <= 0 || counts.isEmpty()) return false;
+        if (!plugin.synergyManager().hasBrewingNeighborThatCompletes(session.location(), counts)) {
+            session.holdingSinceMillis(0);
+            return false;
+        }
+
+        long now = System.currentTimeMillis();
+        if (session.holdingSinceMillis() == 0L) {
+            session.holdingSinceMillis(now);
+            World world = plugin.getServer().getWorld(session.location().worldId());
+            if (world != null) {
+                plugin.locale().broadcastNearby(session.location().toCenter(world),
+                        plugin.configManager().notifyRadius(), "brew.waiting");
+            }
+        } else if (now - session.holdingSinceMillis() >= maxSeconds * 1000L) {
+            session.holdingSinceMillis(0);
+            return false;
+        }
+
+        plugin.cauldronManager().cancelGrace(session);
+        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin,
+                () -> evaluateAfterGrace(session, adder),
+                plugin.configManager().gracePeriodTicks());
+        session.graceTask(task);
+        return true;
     }
 
     public void startBrew(CauldronSession session, Recipe recipe, Player adder) {

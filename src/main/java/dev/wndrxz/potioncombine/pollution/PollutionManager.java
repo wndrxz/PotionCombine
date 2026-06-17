@@ -9,6 +9,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,11 @@ public final class PollutionManager {
 
     private final PotionCombine plugin;
     private final Map<BlockKey, Integer> levels = new HashMap<>();
-    private final Map<BlockKey, BukkitTask> idleTasks = new HashMap<>();
+    // One shared ticker drives every dirty cauldron's idle smoke rather than a
+    // bukkit task apiece. Each cauldron keeps a countdown so the per-level
+    // rate (faint at level 1, busy at the threshold) is preserved exactly.
+    private final Map<BlockKey, Integer> idleCountdown = new HashMap<>();
+    private BukkitTask idleTicker;
 
     public PollutionManager(PotionCombine plugin) {
         this.plugin = plugin;
@@ -134,11 +139,24 @@ public final class PollutionManager {
         return Collections.unmodifiableMap(new HashMap<>(levels));
     }
 
-    public void shutdown() {
-        for (BukkitTask t : idleTasks.values()) {
-            if (t != null) t.cancel();
+    public void refreshIdleTasks() {
+        idleCountdown.clear();
+        if (idleTicker != null) {
+            idleTicker.cancel();
+            idleTicker = null;
         }
-        idleTasks.clear();
+        if (!enabled()) return;
+        for (Map.Entry<BlockKey, Integer> e : levels.entrySet()) {
+            refreshIdle(e.getKey(), e.getValue());
+        }
+    }
+
+    public void shutdown() {
+        if (idleTicker != null) {
+            idleTicker.cancel();
+            idleTicker = null;
+        }
+        idleCountdown.clear();
         levels.clear();
     }
 
@@ -151,39 +169,77 @@ public final class PollutionManager {
         return !ev.isCancelled();
     }
 
+    /** (Re)arm a cauldron's idle countdown and make sure the shared ticker
+     *  is running. A level of zero (or pollution disabled) drops it. */
     private void refreshIdle(BlockKey key, int level) {
-        cancelIdle(key);
-        if (!enabled() || level <= 0) return;
-        World world = plugin.getServer().getWorld(key.worldId());
-        if (world == null) return;
-        Location at = key.toCenter(world).add(0, 0.3, 0);
-        // Idle ambience: a faint smoke pulse whose rate scales with the
-        // level. Stops when the level hits zero or the chunk unloads (the
-        // particle call itself is a no-op if no players are nearby).
-        int period = Math.max(20, 80 - level * 4);
-        BukkitTask task = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
-            World w = plugin.getServer().getWorld(key.worldId());
-            if (w == null) return;
-            if (level(key) <= 0) {
-                cancelIdle(key);
-                return;
-            }
-            // Block was broken or replaced — drop the stale level so the
-            // next time someone places a cauldron here they start clean,
-            // and stop pumping particles at empty air.
-            org.bukkit.Material here = w.getBlockAt(key.x(), key.y(), key.z()).getType();
-            if (here != org.bukkit.Material.WATER_CAULDRON && here != org.bukkit.Material.CAULDRON) {
-                clear(key, PollutionChangeEvent.Cause.EXTERNAL);
-                return;
-            }
-            plugin.configManager().particles().play("pollution_idle", w, at);
-            plugin.soundManager().idle(at);
-        }, period, period);
-        idleTasks.put(key, task);
+        if (!enabled() || level <= 0) {
+            cancelIdle(key);
+            return;
+        }
+        if (plugin.getServer().getWorld(key.worldId()) == null) {
+            cancelIdle(key);
+            return;
+        }
+        idleCountdown.put(key, idlePeriod(level));
+        ensureTicker();
     }
 
     private void cancelIdle(BlockKey key) {
-        BukkitTask t = idleTasks.remove(key);
-        if (t != null) t.cancel();
+        idleCountdown.remove(key);
+        if (idleCountdown.isEmpty() && idleTicker != null) {
+            idleTicker.cancel();
+            idleTicker = null;
+        }
+    }
+
+    /** Ticks between idle pulses for a given level — faint at level 1, busy
+     *  near the threshold. Same curve the 1.1 per-cauldron task used. */
+    private static int idlePeriod(int level) {
+        return Math.max(20, 80 - level * 4);
+    }
+
+    private void ensureTicker() {
+        if (idleTicker != null || idleCountdown.isEmpty()) return;
+        idleTicker = plugin.getServer().getScheduler().runTaskTimer(plugin, this::tickIdle, 1L, 1L);
+    }
+
+    /** The single ticker. Walks every dirty cauldron, counts each down, and
+     *  pulses the one whose timer has run out. Also the place stale levels
+     *  get reaped — a cauldron that was broken or replaced stops haunting
+     *  the air here and frees the next placer from a stranger's grime. */
+    private void tickIdle() {
+        if (idleCountdown.isEmpty()) {
+            if (idleTicker != null) {
+                idleTicker.cancel();
+                idleTicker = null;
+            }
+            return;
+        }
+        for (BlockKey key : new ArrayList<>(idleCountdown.keySet())) {
+            Integer remaining = idleCountdown.get(key);
+            if (remaining == null) continue;
+            if (level(key) <= 0) {
+                cancelIdle(key);
+                continue;
+            }
+            World world = plugin.getServer().getWorld(key.worldId());
+            if (world == null) continue; // world unloaded; hold and retry later
+            if (remaining > 1) {
+                idleCountdown.put(key, remaining - 1);
+                continue;
+            }
+            org.bukkit.Material here = world.getBlockAt(key.x(), key.y(), key.z()).getType();
+            if (here != org.bukkit.Material.WATER_CAULDRON && here != org.bukkit.Material.CAULDRON) {
+                clear(key, PollutionChangeEvent.Cause.EXTERNAL);
+                // A region plugin may have vetoed the clear — re-arm at a sane
+                // cadence so we don't hammer it every tick.
+                if (idleCountdown.containsKey(key)) idleCountdown.put(key, idlePeriod(Math.max(1, level(key))));
+                continue;
+            }
+            Location at = key.toCenter(world).add(0, 0.3, 0);
+            plugin.configManager().particles().play("pollution_idle", world, at);
+            plugin.soundManager().idle(at);
+            idleCountdown.put(key, idlePeriod(level(key)));
+        }
     }
 }

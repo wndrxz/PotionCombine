@@ -179,11 +179,24 @@ public final class RecipeManager {
 
     private PotionType parsePotionType(String raw, PotionType def) {
         if (raw == null || raw.isBlank()) return def;
+        String normalized = normalizePotionType(raw);
         try {
-            return PotionType.valueOf(raw.trim().toUpperCase(Locale.ROOT));
+            return PotionType.valueOf(normalized);
         } catch (IllegalArgumentException ex) {
             return def;
         }
+    }
+
+    private static String normalizePotionType(String raw) {
+        String s = raw.trim().toUpperCase(Locale.ROOT);
+        return switch (s) {
+            case "HEALING" -> "INSTANT_HEAL";
+            case "HARMING" -> "INSTANT_DAMAGE";
+            case "REGENERATION" -> "REGEN";
+            case "LEAPING" -> "JUMP";
+            case "SWIFTNESS" -> "SPEED";
+            default -> s;
+        };
     }
 
     @SuppressWarnings("deprecation") // PotionData is 1.20.4 surface

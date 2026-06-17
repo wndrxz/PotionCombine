@@ -38,8 +38,33 @@ public final class HopperExtractor {
         if (!(below.getState() instanceof Hopper hopper)) return false;
 
         Inventory inv = hopper.getInventory();
-        var leftover = inv.addItem(result.clone());
+        ItemStack copy = result.clone();
+        if (!canFit(inv, copy)) return false;
+
+        var leftover = inv.addItem(copy);
         // addItem returns a map of unfit items. Empty map = success.
         return leftover.isEmpty();
+    }
+
+    private boolean canFit(Inventory inv, ItemStack item) {
+        int remaining = item.getAmount();
+        for (ItemStack slot : inv.getStorageContents()) {
+            int max = maxStackSize(inv, item, slot);
+            if (slot == null || slot.getType() == Material.AIR) {
+                remaining -= max;
+            } else if (slot.isSimilar(item) && slot.getAmount() < max) {
+                remaining -= max - slot.getAmount();
+            }
+            if (remaining <= 0) return true;
+        }
+        return false;
+    }
+
+    private static int maxStackSize(Inventory inv, ItemStack item, ItemStack slot) {
+        int max = Math.min(inv.getMaxStackSize(), item.getMaxStackSize());
+        if (slot != null && slot.getType() != Material.AIR) {
+            max = Math.min(max, slot.getMaxStackSize());
+        }
+        return Math.max(1, max);
     }
 }

@@ -22,6 +22,8 @@ brew:
   failed_polluted: "<red>The grime in the cauldron ruined the brew."
   spoiled: "<dark_gray>The potion has spoiled."
   cauldron_broken: "<red>A brewing cauldron has been broken."
+  chained: "<gray><white><recipe></white> pours into the cauldron next door."
+  waiting: "<gray>The cauldron waits on the brew beside it."
 
 cleaning:
   cleared: "<green>The cauldron is clean again."

@@ -105,4 +105,10 @@ public final class PotionCombineAPI {
     public static long cooldownRemaining(Player player) {
         return cooldownRemaining(Objects.requireNonNull(player).getUniqueId());
     }
+
+    /** True if multi-cauldron synergy (brew chaining + the downstream hold)
+     *  is switched on in config. */
+    public static boolean synergyEnabled() {
+        return ready() && plugin.configManager().synergyEnabled();
+    }
 }

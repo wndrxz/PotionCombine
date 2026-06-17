@@ -1,20 +1,21 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# PotionCombine 1.1.0
+# PotionCombine 1.2.0
 #
 # This file is laid out top-to-bottom in the order you'll probably tweak it:
 #   settings   — language, cooldowns, world filter, notifications
 #   brewing    — timings, sludge and spoil materials, break-stage drops
 #   automation — hopper auto-extract
-#   heat       — what counts as a heat source under the cauldron
+#   heat       — what counts as a heat source under (and now around) the cauldron
+#   synergy    — multi-cauldron brewing chains (1.2, off by default)
 #   sounds     — every sound key the plugin plays
 #   display    — visuals, progress bar template, particle bursts
 #   pollution  — grime mechanic (OFF by default, flip enabled to true)
 #   cleaning   — brush rules for the pollution mechanic
 #
 # Every feature is a toggle. Out of the box this config is tuned for "I
-# just installed it, let me see the brewing in action" — pollution and the
-# cooldown are off, the hopper extract is off, heat sources give friendly
-# bonuses. Read the comments next to each value before you change it.
+# just installed it, let me see the brewing in action" — pollution, the
+# cooldown and synergy are off, the hopper extract is off, heat sources give
+# friendly bonuses. Read the comments next to each value before you change it.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -81,12 +82,39 @@ heat:
   # 'require_lit: true' means a put-out campfire counts as nothing.
   enabled: true
   require_lit: true
+  # Area heat (1.2). Off keeps the 1.1 rule — only the block directly under
+  # the cauldron counts. On, the strongest source within `radius` blocks (the
+  # cauldron's own layer and the one below) counts too, its bonus shrinking by
+  # `falloff_per_block` for every block of distance. A campfire one over is
+  # now worth something; a lava lake two over, a little.
+  area:
+    enabled: false
+    radius: 2
+    falloff_per_block: 0.34
   sources:
     CAMPFIRE:      { brew_time_multiplier: 0.85, pollution_resist: 0.00 }
     SOUL_CAMPFIRE: { brew_time_multiplier: 0.75, pollution_resist: 0.20 }
     MAGMA_BLOCK:   { brew_time_multiplier: 0.90, pollution_resist: 0.00 }
     FIRE:          { brew_time_multiplier: 0.85, pollution_resist: 0.00 }
     LAVA:          { brew_time_multiplier: 0.70, pollution_resist: 0.30 }
+
+synergy:
+  # Multi-cauldron synergy (1.2). Off by default — a 1.1 server upgrades and
+  # behaves identically until you turn this on.
+  #
+  # When enabled, a finished brew can pour straight into a neighbouring water
+  # cauldron instead of hovering, if that neighbour has been loaded with the
+  # rest of a higher-tier recipe and the result is the last piece it needs.
+  # Build phoenix_crown minus its elixir in one cauldron, brew the elixir in
+  # the cauldron beside it, and the bottle flows over on its own.
+  #
+  # To make the timing forgiving, a neighbour that is one ingredient short
+  # waits instead of failing while an adjacent cauldron is still brewing —
+  # up to max_hold_seconds, then it gives up and fails like normal. Set to 0
+  # to disable the wait (chaining still works, you just have to line up the
+  # finish yourself). Only the four side-by-side neighbours are checked.
+  enabled: false
+  max_hold_seconds: 30
 
 sounds:
   # Every entry is a raw string so resource pack namespaces work too,

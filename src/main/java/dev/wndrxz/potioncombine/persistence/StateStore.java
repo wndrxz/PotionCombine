@@ -20,13 +20,9 @@ import java.util.logging.Level;
  *
  * Stored:
  *  - pollution levels per cauldron (resilient to chunk unload, no entities involved);
- *  - the *contents* of any active or partial brew (so on restart the player
- *    finds their ingredients still in the cauldron, ready to be re-tossed
- *    — we don't try to resume the live brew loop, that's 1.3's SQLite job).
+ *  - legacy session entries from older builds, restored once as world drops.
  *
  * Not stored: live BrewingTask state, display entity ids, transient timers.
- * Recreating those mid-flight on every restart would surprise players
- * more than just dropping the work back to "ingredients waiting".
  */
 public final class StateStore {
 
@@ -98,6 +94,7 @@ public final class StateStore {
         }
 
         ConfigurationSection sessions = in.getConfigurationSection("sessions");
+        List<String> droppedSessionKeys = new ArrayList<>();
         if (sessions != null) {
             for (String key : sessions.getKeys(false)) {
                 ConfigurationSection s = sessions.getConfigurationSection(key);
@@ -117,11 +114,23 @@ public final class StateStore {
                 for (Object o : raw) {
                     if (o instanceof ItemStack is) stacks.add(is);
                 }
+                boolean dropped = false;
                 for (ItemStack is : stacks) {
                     if (is != null && is.getType() != org.bukkit.Material.AIR) {
                         world.dropItem(at, is);
+                        dropped = true;
                     }
                 }
+                if (dropped) droppedSessionKeys.add(key);
+            }
+        }
+
+        if (!droppedSessionKeys.isEmpty()) {
+            for (String key : droppedSessionKeys) sessions.set(key, null);
+            try {
+                in.save(file);
+            } catch (IOException ex) {
+                plugin.getLogger().log(Level.WARNING, "Could not prune restored sessions: " + ex.getMessage());
             }
         }
     }

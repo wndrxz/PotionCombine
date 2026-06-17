@@ -18,6 +18,7 @@ import dev.wndrxz.potioncombine.recipe.RecipeManager;
 import dev.wndrxz.potioncombine.listener.CauldronListener;
 import dev.wndrxz.potioncombine.pollution.PollutionManager;
 import dev.wndrxz.potioncombine.sound.SoundManager;
+import dev.wndrxz.potioncombine.synergy.SynergyManager;
 import dev.wndrxz.potioncombine.util.Keys;
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
@@ -40,6 +41,7 @@ public final class PotionCombine extends JavaPlugin {
     private HeatSourceManager heatSourceManager;
     private CooldownManager cooldownManager;
     private HopperExtractor hopperExtractor;
+    private SynergyManager synergyManager;
     private PlaceholderHook placeholderHook;
     private StateStore stateStore;
 
@@ -70,6 +72,7 @@ public final class PotionCombine extends JavaPlugin {
         this.pollutionManager = new PollutionManager(this);
         this.cooldownManager = new CooldownManager(this);
         this.hopperExtractor = new HopperExtractor(this);
+        this.synergyManager = new SynergyManager(this);
         this.brewingService = new BrewingService(this);
         this.placeholderHook = new PlaceholderHook(this);
         this.stateStore = new StateStore(this);
@@ -103,10 +106,6 @@ public final class PotionCombine extends JavaPlugin {
     public void onDisable() {
         if (cauldronManager == null) return;
 
-        // Snapshot persistent state BEFORE we cancel tasks and drop ingredients
-        // — those steps wipe the in-memory model.
-        if (stateStore != null) stateStore.save();
-
         World fallback = getServer().getWorlds().isEmpty() ? null : getServer().getWorlds().get(0);
         for (CauldronSession s : cauldronManager.all().values()) {
             cauldronManager.cancelAllTasks(s);
@@ -118,6 +117,11 @@ public final class PotionCombine extends JavaPlugin {
         }
         cauldronManager.dropAllIngredients(fallback);
         cauldronManager.all().clear();
+
+        // Ingredients were dropped above; persist only the state that should
+        // survive a clean shutdown.
+        if (stateStore != null) stateStore.save();
+
         if (pollutionManager != null) pollutionManager.shutdown();
         if (cooldownManager  != null) cooldownManager.clear();
     }
@@ -132,6 +136,8 @@ public final class PotionCombine extends JavaPlugin {
 
         YamlConfiguration recipes = configManager.loadRecipes();
         recipeManager.load(recipes, configManager.maxRecipes(), configManager.defaultBrewTicks());
+
+        if (pollutionManager != null) pollutionManager.refreshIdleTasks();
     }
 
     public ConfigManager configManager()   { return configManager; }
@@ -146,5 +152,6 @@ public final class PotionCombine extends JavaPlugin {
     public HeatSourceManager heatSourceManager() { return heatSourceManager; }
     public CooldownManager cooldownManager() { return cooldownManager; }
     public HopperExtractor hopperExtractor() { return hopperExtractor; }
+    public SynergyManager synergyManager() { return synergyManager; }
     public PlaceholderHook placeholderHook() { return placeholderHook; }
 }
