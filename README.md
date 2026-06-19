@@ -5,7 +5,7 @@ into a water cauldron, wait out a short grace period, and if the pile
 matches a recipe the cauldron brews it: bubbles, a progress bar over
 the water, a spinning bottle to grab at the end. No GUIs, no NMS.
 
-Status: 1.1.0.
+Status: 1.2.0.
 
 ## Requirements
 
@@ -26,7 +26,10 @@ Extras, each behind its own toggle in config.yml:
 
 - pollution: brews leave grime, a filthy cauldron refuses to work until
   scrubbed with a brush
-- heat: campfire, magma or lava under the cauldron brews faster
+- heat: campfire, magma or lava under the cauldron brews faster, and
+  heat.area widens the search to nearby blocks
+- synergy: a finished brew pours itself into a neighbouring cauldron
+  that's waiting on exactly that bottle
 - hopper under the cauldron pulls finished potions out
 - per-world whitelist/blacklist and a per-player cooldown
 - small public api: static facade plus cancellable events for start,
@@ -38,7 +41,8 @@ recipes (phoenix_crown wants a brewed phoenix_elixir). Locales: en, ru.
 ## Build
 
 `./gradlew build` — the jar lands in `build/libs/`.
-`./gradlew test` — the matcher suite runs against the real paper classpath.
+`./gradlew test` — matcher, heat math and synergy suites, all against
+the real paper classpath.
 
 ## Data files
 
