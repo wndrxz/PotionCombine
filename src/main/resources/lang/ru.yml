@@ -42,10 +42,25 @@ command:
   help_give: "<gray>/potioncombine give <player> <recipe_id> [amount] <dark_gray>— выдать готовое зелье"
   help_help: "<gray>/potioncombine help <dark_gray>— этот список"
   help_info: "<gray>/potioncombine info <dark_gray>— версия, число рецептов, хуки"
+  help_journal: "<gray>/potioncombine journal [discovery|reference|notes] <dark_gray>— открыть журнал"
   info_version: "<gray>Версия: <white><version></white>"
   info_recipes: "<gray>Загружено рецептов: <white><count></white>"
   info_brews:   "<gray>Активных варок: <white><count></white>"
   info_papi:    "<gray>PlaceholderAPI: <white><state></white>"
+
+journal:
+  title: "<dark_purple>Журнал алхимика"
+  disabled: "<red>Журнал на этом сервере отключён."
+  empty: "<gray>Здесь пока ничего не записано — сварите что-нибудь."
+  discovered: "<light_purple>Открыт новый рецепт: <white><recipe></white>!"
+  discovery_header: "<dark_gray>Открыто рецептов: <white><found></white><dark_gray>/<white><total></white>."
+  locked_entry: "<gray>??? <dark_gray>(не открыт)"
+  reference_needs: "<dark_gray>Нужно:"
+  notes_header: "<dark_gray>Лабораторные заметки"
+  notes_brews: "<gray>Собрано зелий: <white><count></white>"
+  notes_spoiled: "<gray>Испорчено: <white><count></white>"
+  notes_failed: "<gray>Неудач: <white><count></white>"
+  notes_favourites: "<dark_gray>Чаще всего варят:"
 
 startup:
   locale_resolved: "Локаль выбрана: '<locale>'."

@@ -111,4 +111,25 @@ public final class PotionCombineAPI {
     public static boolean synergyEnabled() {
         return ready() && plugin.configManager().synergyEnabled();
     }
+
+    /** True if alchemist progression (per-player discovery + lab-notes) is
+     *  switched on. With it off, nothing is tracked and {@link
+     *  #hasDiscovered(UUID, String)} always reports true. */
+    public static boolean progressionEnabled() {
+        return ready() && plugin.configManager().progressionEnabled();
+    }
+
+    /** Has a player discovered (ever brewed) a given recipe? Always true when
+     *  progression is disabled — there is no notion of an undiscovered recipe
+     *  then, so callers gating content on discovery degrade to "everyone has
+     *  it". Null-safe: a null player or recipe id reports false. */
+    public static boolean hasDiscovered(UUID playerId, String recipeId) {
+        if (!ready() || playerId == null || recipeId == null) return false;
+        if (!plugin.configManager().progressionEnabled()) return true;
+        return plugin.progressManager().of(playerId).hasDiscovered(recipeId);
+    }
+
+    public static boolean hasDiscovered(Player player, String recipeId) {
+        return player != null && hasDiscovered(player.getUniqueId(), recipeId);
+    }
 }

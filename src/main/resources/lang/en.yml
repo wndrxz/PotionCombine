@@ -48,6 +48,20 @@ command:
   info_brews:   "<gray>Active brews: <white><count></white>"
   info_papi:    "<gray>PlaceholderAPI: <white><state></white>"
 
+journal:
+  title: "<dark_purple>Alchemist's Journal"
+  disabled: "<red>The journal is switched off on this server."
+  empty: "<gray>Nothing written here yet — brew something."
+  discovered: "<light_purple>New recipe discovered: <white><recipe></white>!"
+  discovery_header: "<dark_gray>Discovered <white><found></white><dark_gray>/<white><total></white> recipes."
+  locked_entry: "<gray>??? <dark_gray>(undiscovered)"
+  reference_needs: "<dark_gray>Needs:"
+  notes_header: "<dark_gray>Lab notes"
+  notes_brews: "<gray>Brews collected: <white><count></white>"
+  notes_spoiled: "<gray>Spoiled: <white><count></white>"
+  notes_failed: "<gray>Failed: <white><count></white>"
+  notes_favourites: "<dark_gray>Most brewed:"
+
 startup:
   locale_resolved: "Locale resolved to '<locale>'."
   recipes_loaded: "Loaded <count> recipe(s) from recipes.yml."

@@ -81,6 +81,10 @@ public final class ConfigManager {
     private boolean synergyEnabled = false;
     private int     synergyMaxHoldSeconds = 30;
 
+    private boolean progressionEnabled = false;
+    private boolean journalEnabled = true;
+    private boolean restoreLiveBrews = true;
+
     public ConfigManager(PotionCombine plugin) {
         this.plugin = plugin;
     }
@@ -151,6 +155,10 @@ public final class ConfigManager {
 
         synergyEnabled        = root.getBoolean("synergy.enabled", false);
         synergyMaxHoldSeconds = Math.max(0, root.getInt("synergy.max_hold_seconds", 30));
+
+        progressionEnabled = root.getBoolean("progression.enabled", false);
+        journalEnabled     = root.getBoolean("progression.journal_enabled", true);
+        restoreLiveBrews   = root.getBoolean("progression.restore_live_brews", true);
 
         if (plugin.heatSourceManager() != null) {
             plugin.heatSourceManager().load(root.getConfigurationSection("heat"));
@@ -261,4 +269,8 @@ public final class ConfigManager {
 
     public boolean synergyEnabled() { return synergyEnabled; }
     public int synergyMaxHoldSeconds() { return synergyMaxHoldSeconds; }
+
+    public boolean progressionEnabled() { return progressionEnabled; }
+    public boolean journalEnabled() { return journalEnabled; }
+    public boolean restoreLiveBrews() { return restoreLiveBrews; }
 }

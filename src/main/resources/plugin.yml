@@ -13,11 +13,11 @@ commands:
   potioncombine:
     description: Root command for PotionCombine.
     aliases: [pc, pcombine]
-    usage: /<command> <reload|give|help|info>
+    usage: /<command> <reload|give|help|info|journal>
 
 permissions:
   potioncombine.use:
-    description: Use player-facing commands (help, future journal/stats).
+    description: Use player-facing commands (help, info, journal).
     default: true
   potioncombine.admin:
     description: Reload config, give result items, inspect cauldrons.

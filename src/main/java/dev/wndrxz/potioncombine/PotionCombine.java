@@ -11,8 +11,10 @@ import dev.wndrxz.potioncombine.cooldown.CooldownManager;
 import dev.wndrxz.potioncombine.display.DisplayManager;
 import dev.wndrxz.potioncombine.heat.HeatSourceManager;
 import dev.wndrxz.potioncombine.integration.PlaceholderHook;
+import dev.wndrxz.potioncombine.journal.JournalManager;
 import dev.wndrxz.potioncombine.locale.LocaleManager;
 import dev.wndrxz.potioncombine.persistence.StateStore;
+import dev.wndrxz.potioncombine.progress.ProgressManager;
 import dev.wndrxz.potioncombine.recipe.ItemMatcher;
 import dev.wndrxz.potioncombine.recipe.RecipeManager;
 import dev.wndrxz.potioncombine.listener.CauldronListener;
@@ -42,6 +44,8 @@ public final class PotionCombine extends JavaPlugin {
     private CooldownManager cooldownManager;
     private HopperExtractor hopperExtractor;
     private SynergyManager synergyManager;
+    private ProgressManager progressManager;
+    private JournalManager journalManager;
     private PlaceholderHook placeholderHook;
     private StateStore stateStore;
 
@@ -73,6 +77,8 @@ public final class PotionCombine extends JavaPlugin {
         this.cooldownManager = new CooldownManager(this);
         this.hopperExtractor = new HopperExtractor(this);
         this.synergyManager = new SynergyManager(this);
+        this.progressManager = new ProgressManager(this);
+        this.journalManager = new JournalManager(this);
         this.brewingService = new BrewingService(this);
         this.placeholderHook = new PlaceholderHook(this);
         this.stateStore = new StateStore(this);
@@ -91,7 +97,12 @@ public final class PotionCombine extends JavaPlugin {
         int sweep = displayManager.sweepOrphans();
         if (sweep > 0) getLogger().info("Removed " + sweep + " orphan display entit(y/ies).");
 
-        // Restore pollution + drop persisted ingredients back next to their
+        // Alchemist progression — who has discovered what. Loaded before the
+        // state store so a resumed brew can still attribute its discovery.
+        progressManager.load();
+
+        // Restore pollution, resume any live brews that were cooking when the
+        // server went down, and drop persisted ingredients back next to their
         // cauldrons so a hard crash mid-brew is no longer a black hole.
         stateStore.load();
 
@@ -115,15 +126,18 @@ public final class PotionCombine extends JavaPlugin {
                 displayManager.remove(s.itemDisplayId(), w);
             }
         }
-        cauldronManager.dropAllIngredients(fallback);
-        cauldronManager.all().clear();
 
-        // Ingredients were dropped above; persist only the state that should
-        // survive a clean shutdown.
-        if (stateStore != null) stateStore.save();
+        // Persist first, then drop. Live brews that were saved for resume are
+        // returned here so we don't also spill their ingredients onto the
+        // ground — that would duplicate them on the next boot.
+        java.util.Set<dev.wndrxz.potioncombine.util.BlockKey> persisted =
+                stateStore != null ? stateStore.save() : java.util.Set.of();
+        cauldronManager.dropAllIngredients(fallback, persisted);
+        cauldronManager.all().clear();
 
         if (pollutionManager != null) pollutionManager.shutdown();
         if (cooldownManager  != null) cooldownManager.clear();
+        if (progressManager  != null) progressManager.save();
     }
 
     /** Reload both config.yml and recipes.yml on the fly. Sessions in
@@ -138,6 +152,13 @@ public final class PotionCombine extends JavaPlugin {
         recipeManager.load(recipes, configManager.maxRecipes(), configManager.defaultBrewTicks());
 
         if (pollutionManager != null) pollutionManager.refreshIdleTasks();
+
+        // A reload that flips progression on for the first time should pick up
+        // any progress.yml on disk; one that finds it already loaded leaves the
+        // running tallies alone, the same way live brews are left alone.
+        if (progressManager != null && progressManager.enabled() && !progressManager.loaded()) {
+            progressManager.load();
+        }
     }
 
     public ConfigManager configManager()   { return configManager; }
@@ -153,5 +174,7 @@ public final class PotionCombine extends JavaPlugin {
     public CooldownManager cooldownManager() { return cooldownManager; }
     public HopperExtractor hopperExtractor() { return hopperExtractor; }
     public SynergyManager synergyManager() { return synergyManager; }
+    public ProgressManager progressManager() { return progressManager; }
+    public JournalManager journalManager() { return journalManager; }
     public PlaceholderHook placeholderHook() { return placeholderHook; }
 }

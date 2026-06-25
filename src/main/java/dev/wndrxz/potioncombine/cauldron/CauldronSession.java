@@ -29,6 +29,8 @@ public final class CauldronSession {
     private long lastInsertTick;
     private double progressFraction; // 0.0 at brew start, 1.0 at finish
     private long holdingSinceMillis; // 0 = not holding for an upstream brew
+    private int brewTotalTicks;      // adjusted brew length, kept so a resumed brew lands at the same finish
+    private int readyElapsedTicks;   // ticks the finished result has hovered, for the spoil clock across a restart
 
     public CauldronSession(BlockKey location) {
         this.location = location;
@@ -79,4 +81,10 @@ public final class CauldronSession {
 
     public long holdingSinceMillis() { return holdingSinceMillis; }
     public void holdingSinceMillis(long t) { this.holdingSinceMillis = t; }
+
+    public int brewTotalTicks() { return brewTotalTicks; }
+    public void brewTotalTicks(int t) { this.brewTotalTicks = t; }
+
+    public int readyElapsedTicks() { return readyElapsedTicks; }
+    public void readyElapsedTicks(int t) { this.readyElapsedTicks = t; }
 }

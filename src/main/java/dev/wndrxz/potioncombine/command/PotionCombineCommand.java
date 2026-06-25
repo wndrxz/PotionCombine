@@ -1,6 +1,7 @@
 package dev.wndrxz.potioncombine.command;
 
 import dev.wndrxz.potioncombine.PotionCombine;
+import dev.wndrxz.potioncombine.journal.JournalManager;
 import dev.wndrxz.potioncombine.locale.LocaleManager;
 import dev.wndrxz.potioncombine.recipe.Recipe;
 import org.bukkit.Bukkit;
@@ -36,6 +37,7 @@ public final class PotionCombineCommand implements TabExecutor {
             case "reload" -> reload(sender);
             case "give"   -> give(sender, args);
             case "info"   -> info(sender);
+            case "journal" -> journal(sender, args);
             case "help"   -> sendHelp(sender);
             default       -> plugin.locale().send(sender, "command.unknown");
         }
@@ -111,10 +113,33 @@ public final class PotionCombineCommand implements TabExecutor {
                 LocaleManager.placeholder("player", p.getName()));
     }
 
+    private void journal(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            plugin.locale().send(sender, "command.player_only");
+            return;
+        }
+        if (!plugin.configManager().journalEnabled()) {
+            plugin.locale().send(sender, "journal.disabled");
+            return;
+        }
+        JournalManager.Mode mode = JournalManager.Mode.DISCOVERY;
+        if (args.length >= 2) {
+            switch (args[1].toLowerCase(Locale.ROOT)) {
+                case "reference", "recipes" -> mode = JournalManager.Mode.REFERENCE;
+                case "notes", "lab"         -> mode = JournalManager.Mode.NOTES;
+                default                     -> mode = JournalManager.Mode.DISCOVERY;
+            }
+        }
+        plugin.journalManager().open(player, mode);
+    }
+
     private void sendHelp(CommandSender sender) {
         plugin.locale().sendPlain(sender, "command.help_header");
         plugin.locale().sendPlain(sender, "command.help_help");
         plugin.locale().sendPlain(sender, "command.help_info");
+        if (plugin.configManager().journalEnabled()) {
+            plugin.locale().sendPlain(sender, "command.help_journal");
+        }
         if (sender.hasPermission("potioncombine.admin")) {
             plugin.locale().sendPlain(sender, "command.help_reload");
             plugin.locale().sendPlain(sender, "command.help_give");
@@ -125,7 +150,10 @@ public final class PotionCombineCommand implements TabExecutor {
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                       @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            return filter(List.of("help", "info", "reload", "give"), args[0]);
+            return filter(List.of("help", "info", "journal", "reload", "give"), args[0]);
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("journal")) {
+            return filter(List.of("discovery", "reference", "notes"), args[1]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("give")) {
             List<String> names = new ArrayList<>();

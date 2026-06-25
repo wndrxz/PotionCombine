@@ -83,11 +83,13 @@ public final class CauldronManager {
     }
 
     /** Drop every ingredient currently held by every session at its cauldron.
-     *  Called on plugin disable. */
-    public void dropAllIngredients(World fallback) {
+     *  Called on plugin disable. Sessions whose keys appear in {@code skip}
+     *  were persisted for resume, so spilling them here would duplicate them. */
+    public void dropAllIngredients(World fallback, java.util.Set<BlockKey> skip) {
         for (Map.Entry<BlockKey, CauldronSession> e : sessions.entrySet()) {
             CauldronSession s = e.getValue();
             BlockKey k = e.getKey();
+            if (skip != null && skip.contains(k)) continue;
             World w = plugin.getServer().getWorld(k.worldId());
             World use = w != null ? w : fallback;
             if (use == null) continue;

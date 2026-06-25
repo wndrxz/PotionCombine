@@ -207,7 +207,15 @@ public final class BrewingService {
             case WATER_LOST  -> "brew.failed_water_lost";
             case POLLUTED    -> "brew.failed_polluted";
         };
-        if (notify != null && notify.isOnline()) plugin.locale().send(notify, key2);
+        if (notify != null && notify.isOnline()) {
+            plugin.locale().send(notify, key2);
+            // A failure we can pin on a player (the one who triggered the
+            // grace check) counts toward their lab-notes tally. Water-loss is
+            // nobody's fault, so it does not.
+            if (reason != FailureReason.WATER_LOST) {
+                plugin.progressManager().recordFailed(notify.getUniqueId());
+            }
+        }
         // Anyone standing near the cauldron needs to know too — silent fails
         // are confusing when no chat ping reaches the player who walked away.
         // Skip if the only player we'd notify is the same one we already
@@ -265,12 +273,23 @@ public final class BrewingService {
 
         if (spoiled) {
             plugin.locale().send(player, "brew.spoiled");
+            plugin.progressManager().recordSpoiled(player.getUniqueId());
         } else {
             Component recipeName = session.matched() != null
                     ? legacy.deserialize(session.matched().displayNameLegacy())
                     : Component.empty();
             plugin.locale().send(player, "cauldron.collect_success",
                     LocaleManager.component("recipe", recipeName));
+
+            // Progression: the collecting player is the one credited with the
+            // brew (and any first-time discovery), not whoever happened to drop
+            // the last ingredient. Fired only on a real, non-spoiled result.
+            String recipeId = session.matched() != null ? session.matched().id() : null;
+            boolean firstTime = plugin.progressManager().recordBrew(player.getUniqueId(), recipeId);
+            if (firstTime) {
+                plugin.locale().send(player, "journal.discovered",
+                        LocaleManager.component("recipe", recipeName));
+            }
         }
 
         plugin.cauldronManager().cancelAllTasks(session);
@@ -284,6 +303,104 @@ public final class BrewingService {
 
     public void onWaterLost(CauldronSession session) {
         failBrew(session, FailureReason.WATER_LOST, null);
+    }
+
+    /**
+     * Re-arm a brew that was persisted before a shutdown. Called once per
+     * saved brew on plugin enable. Rebuilds the session, its display entities
+     * and (for a still-cooking brew) the brew loop from the progress recorded
+     * at save time, so a hard crash mid-brew is no longer a black hole.
+     *
+     * Returns false — and drops the ingredients back at the cauldron — when
+     * the brew can't be honoured: the recipe was removed from recipes.yml, or
+     * the water is gone from the block while we were down.
+     */
+    public boolean resumeBrew(BlockKey key, Recipe recipe, CauldronSession.State state,
+                              double progress, int brewTicks, int readyElapsed,
+                              ItemStack readyItem, java.util.List<ItemStack> ingredients) {
+        World world = plugin.getServer().getWorld(key.worldId());
+        if (world == null) return false;
+
+        Block block = world.getBlockAt(key.x(), key.y(), key.z());
+        boolean stillBrewing = state == CauldronSession.State.BREWING;
+
+        // A recipe that no longer loads, or a cauldron whose water has gone,
+        // can't carry a live brew. Give the ingredients back rather than keep
+        // a half-state the player can never finish.
+        if (recipe == null
+                || (stillBrewing && block.getType() != Material.WATER_CAULDRON)) {
+            dropResumeFallback(world, key, ingredients, readyItem);
+            return false;
+        }
+
+        CauldronSession session = plugin.cauldronManager().getOrCreate(block);
+        session.matched(recipe);
+        for (ItemStack ing : reversed(ingredients)) {
+            if (ing != null && ing.getType() != Material.AIR) session.addIngredient(ing);
+        }
+
+        Location centre = key.toCenter(world);
+        Location dispLoc = centre.clone().add(0, plugin.configManager().displayYOffset(), 0);
+        int spoilTicks = plugin.configManager().overbrewSeconds() * 20;
+        int total = brewTicks > 0 ? brewTicks : recipe.brewTimeTicks();
+
+        if (stillBrewing) {
+            session.state(CauldronSession.State.BREWING);
+            session.progressFraction(progress);
+            int startTicks = (int) Math.max(0, Math.min(total, Math.round(progress * total)));
+
+            Component header = plugin.locale().get("brew.started",
+                    LocaleManager.component("recipe",
+                            legacy.deserialize(recipe.displayNameLegacy())));
+            session.textDisplayId(plugin.displayManager().spawnText(dispLoc, header));
+
+            BrewingTask task = new BrewingTask(plugin, session, recipe, world, centre,
+                    total, spoilTicks, startTicks, BrewingTask.Phase.BREWING, 0);
+            session.brewTask(task.runTaskTimer(plugin, 0L, 1L));
+            return true;
+        }
+
+        // READY or SPOILED — the brew is done, the result hovers. Re-spawn the
+        // glowing item and either keep counting toward spoil (READY) or leave
+        // it parked as spoiled until someone collects it.
+        ItemStack hover = readyItem != null ? readyItem : plugin.recipeManager().produce(recipe);
+        if (hover == null) hover = new ItemStack(Material.POTION);
+        session.readyItem(hover);
+        session.progressFraction(1.0);
+        session.itemDisplayId(plugin.displayManager().spawnItem(dispLoc, hover));
+
+        if (state == CauldronSession.State.SPOILED) {
+            session.state(CauldronSession.State.SPOILED);
+            return true;
+        }
+
+        session.state(CauldronSession.State.READY);
+        session.readyElapsedTicks(readyElapsed);
+        BrewingTask task = new BrewingTask(plugin, session, recipe, world, centre,
+                total, spoilTicks, total, BrewingTask.Phase.READY, readyElapsed);
+        session.brewTask(task.runTaskTimer(plugin, 0L, 1L));
+        return true;
+    }
+
+    private void dropResumeFallback(World world, BlockKey key,
+                                    java.util.List<ItemStack> ingredients, ItemStack readyItem) {
+        Location at = key.toCenter(world).add(0, 0.7, 0);
+        if (readyItem != null && readyItem.getType() != Material.AIR) {
+            world.dropItem(at, readyItem.clone());
+            return;
+        }
+        if (ingredients == null) return;
+        for (ItemStack ing : ingredients) {
+            if (ing != null && ing.getType() != Material.AIR) world.dropItem(at, ing);
+        }
+    }
+
+    /** The persisted ingredient list is top-of-stack first; pushing it back in
+     *  reverse restores the LIFO order a player's retrieve relies on. */
+    private static java.util.List<ItemStack> reversed(java.util.List<ItemStack> in) {
+        java.util.List<ItemStack> out = new java.util.ArrayList<>(in);
+        java.util.Collections.reverse(out);
+        return out;
     }
 
     /** Player (or something else) broke the cauldron block. The session is

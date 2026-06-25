@@ -22,7 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public final class BrewingTask extends BukkitRunnable {
 
-    private enum Phase { BREWING, READY }
+    enum Phase { BREWING, READY }
 
     private final PotionCombine plugin;
     private final CauldronSession session;
@@ -39,6 +39,16 @@ public final class BrewingTask extends BukkitRunnable {
 
     public BrewingTask(PotionCombine plugin, CauldronSession session, Recipe recipe,
                        World world, Location centre, int totalBrewTicks, int spoilTicks) {
+        this(plugin, session, recipe, world, centre, totalBrewTicks, spoilTicks, 0, Phase.BREWING, 0);
+    }
+
+    /** Resume constructor. {@code startTicks} is how far the brew had already
+     *  progressed; {@code startPhase} and {@code readyElapsedStart} pick up a
+     *  finished-but-uncollected result mid-spoil. Used only by the state-store
+     *  restore path on boot — a fresh brew always starts at zero. */
+    public BrewingTask(PotionCombine plugin, CauldronSession session, Recipe recipe,
+                       World world, Location centre, int totalBrewTicks, int spoilTicks,
+                       int startTicks, Phase startPhase, int readyElapsedStart) {
         this.plugin = plugin;
         this.session = session;
         this.recipe = recipe;
@@ -47,6 +57,10 @@ public final class BrewingTask extends BukkitRunnable {
         this.totalBrewTicks = Math.max(1, totalBrewTicks);
         this.spoilTicks = Math.max(0, spoilTicks);
         this.recipeName = LegacyComponentSerializer.legacyAmpersand().deserialize(recipe.displayNameLegacy());
+        this.ticks = Math.max(0, Math.min(startTicks, this.totalBrewTicks));
+        this.phase = startPhase;
+        this.readyElapsed = Math.max(0, readyElapsedStart);
+        session.brewTotalTicks(this.totalBrewTicks);
     }
 
     @Override
@@ -79,6 +93,7 @@ public final class BrewingTask extends BukkitRunnable {
 
     private void tickReady() {
         readyElapsed++;
+        session.readyElapsedTicks(readyElapsed);
         plugin.displayManager().rotateItem(session.itemDisplayId(), world,
                 readyElapsed * plugin.configManager().resultSpinPerTick());
 
