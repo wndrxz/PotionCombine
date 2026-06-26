@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3 — 2026-06-26
+
+The plugin stops forgetting things between restarts.
+
+- live brews survive a shutdown: mid-brew cauldrons and uncollected
+  results go to state.yml and resume on the next boot. on by default,
+  restore_live_brews: false brings back the old spill-on-shutdown
+- progression (off by default): per-player record of discovered recipes
+  plus brew/spoil/fail counters, stored in a flat progress.yml
+- /potioncombine journal opens a written book — discovery, reference
+  and notes modes. with progression off it still opens as a plain
+  cookbook
+- api: progressionEnabled(), hasDiscovered(player, recipeId)
+- PlayerProgressTest
+
 ## 1.2 — 2026-06-19
 
 Cauldrons stop being loners.

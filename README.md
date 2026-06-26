@@ -5,7 +5,7 @@ into a water cauldron, wait out a short grace period, and if the pile
 matches a recipe the cauldron brews it: bubbles, a progress bar over
 the water, a spinning bottle to grab at the end. No GUIs, no NMS.
 
-Status: 1.2.0.
+Status: 1.3.0.
 
 ## Requirements
 
@@ -32,6 +32,8 @@ Extras, each behind its own toggle in config.yml:
   that's waiting on exactly that bottle
 - hopper under the cauldron pulls finished potions out
 - per-world whitelist/blacklist and a per-player cooldown
+- progression + /pc journal: an in-game book that fills in as you
+  discover recipes
 - small public api: static facade plus cancellable events for start,
   success, fail, collect and pollution change
 
@@ -41,12 +43,13 @@ recipes (phoenix_crown wants a brewed phoenix_elixir). Locales: en, ru.
 ## Build
 
 `./gradlew build` — the jar lands in `build/libs/`.
-`./gradlew test` — matcher, heat math and synergy suites, all against
-the real paper classpath.
+`./gradlew test` — four suites (matcher, heat math, synergy, player
+progress) against the real paper classpath.
 
 ## Data files
 
-state.yml (cauldron pollution) is generated, don't edit it by hand.
+state.yml (pollution + live brews to resume) and progress.yml
+(per-player discovery) are generated, don't edit them by hand.
 
 ## License
 
