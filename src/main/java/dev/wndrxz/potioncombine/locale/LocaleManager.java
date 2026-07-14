@@ -71,10 +71,20 @@ public final class LocaleManager {
      *  When the radius is zero or negative, nobody is notified. The cauldron
      *  itself is not a player, so we always go through online players. */
     public void broadcastNearby(org.bukkit.Location centre, int radius, String key, TagResolver... resolvers) {
+        broadcastNearbyExcept(centre, radius, null, key, resolvers);
+    }
+
+    /** As {@link #broadcastNearby}, but skips {@code exclude} - used when that
+     *  player was already messaged directly, so the area broadcast does not
+     *  reach them a second time. */
+    public void broadcastNearbyExcept(org.bukkit.Location centre, int radius,
+                                      org.bukkit.entity.Player exclude,
+                                      String key, TagResolver... resolvers) {
         if (centre == null || centre.getWorld() == null || radius <= 0) return;
         net.kyori.adventure.text.Component msg = prefixed(key, resolvers);
         double r2 = (double) radius * radius;
         for (org.bukkit.entity.Player p : centre.getWorld().getPlayers()) {
+            if (exclude != null && p.getUniqueId().equals(exclude.getUniqueId())) continue;
             if (p.getLocation().distanceSquared(centre) <= r2) p.sendMessage(msg);
         }
     }

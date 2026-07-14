@@ -1,22 +1,26 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# PotionCombine 1.3.0
+# PotionCombine 1.3.1
 #
 # This file is laid out top-to-bottom in the order you'll probably tweak it:
 #   settings   — language, cooldowns, world filter, notifications
 #   brewing    — timings, sludge and spoil materials, break-stage drops
 #   automation — hopper auto-extract
 #   heat       — what counts as a heat source under (and now around) the cauldron
-#   synergy    — multi-cauldron brewing chains (1.2, off by default)
+#   synergy    — multi-cauldron brewing chains (1.2, shipped ON here)
 #   sounds     — every sound key the plugin plays
 #   display    — visuals, progress bar template, particle bursts
-#   pollution  — grime mechanic (OFF by default, flip enabled to true)
+#   pollution  — grime mechanic (shipped ON here, gentle threshold)
 #   cleaning   — brush rules for the pollution mechanic
-#   progression — alchemist discovery + journal, live-brew crash survival (1.3, off)
+#   progression — alchemist discovery + journal, live-brew restore (1.3, shipped ON)
 #
 # Every feature is a toggle. Out of the box this config is tuned for "I
-# just installed it, let me see the brewing in action" — pollution, the
-# cooldown and synergy are off, the hopper extract is off, heat sources give
-# friendly bonuses. Read the comments next to each value before you change it.
+# just installed it, let me try every feature without editing anything" —
+# pollution, synergy, progression and area heat are all ON with gentle,
+# forgiving values, and heat sources give friendly bonuses. The only things
+# left off are the ones that change vanilla item flow or gate players:
+# hopper auto-extract and the per-player cooldown. For a production server
+# you will likely want to turn pollution/synergy back off (or retune them)
+# and pick a cooldown. Read the comments next to each value before changing.
 # ─────────────────────────────────────────────────────────────────────────────
 
 settings:
@@ -25,7 +29,9 @@ settings:
   # Recipes above this index are ignored with a load-time warning.
   max_recipes: 20
   # Ticks of silence after the last insert before the matcher fires.
-  grace_period_ticks: 20
+  # Raised to 60 (3s) so there is comfortable time to drop every ingredient
+  # of a multi-item recipe in before the cauldron commits and evaluates.
+  grace_period_ticks: 60
   # Shift-RMB pulls the last inserted item back. False locks items in.
   ingredient_retrieval: true
   # Per-player cooldown between brew starts (seconds). 0 disables it.
@@ -89,7 +95,9 @@ heat:
   # `falloff_per_block` for every block of distance. A campfire one over is
   # now worth something; a lava lake two over, a little.
   area:
-    enabled: false
+    # ON by default in this test-friendly config so a nearby heat source
+    # (not just the one block underneath) counts. Set false for the 1.1 rule.
+    enabled: true
     radius: 2
     falloff_per_block: 0.34
   sources:
@@ -100,8 +108,8 @@ heat:
     LAVA:          { brew_time_multiplier: 0.70, pollution_resist: 0.30 }
 
 synergy:
-  # Multi-cauldron synergy (1.2). Off by default — a 1.1 server upgrades and
-  # behaves identically until you turn this on.
+  # Multi-cauldron synergy (1.2). Set false and a 1.1 server behaves
+  # identically — but this test-friendly config ships it ON (see below).
   #
   # When enabled, a finished brew can pour straight into a neighbouring water
   # cauldron instead of hovering, if that neighbour has been loaded with the
@@ -114,20 +122,28 @@ synergy:
   # up to max_hold_seconds, then it gives up and fails like normal. Set to 0
   # to disable the wait (chaining still works, you just have to line up the
   # finish yourself). Only the four side-by-side neighbours are checked.
-  enabled: false
+  #
+  # ON by default in this test-friendly config so multi-cauldron chains work
+  # out of the box. Set false for the 1.1 single-cauldron behaviour.
+  enabled: true
   max_hold_seconds: 30
 
 progression:
-  # Alchemist progression (1.3). Off by default - a 1.2 server upgrades and
-  # behaves identically until you turn this on. When enabled, the plugin
-  # remembers which recipes each player has brewed and keeps a few counters
-  # for the journal's lab-notes page. Storage is a flat progress.yml in the
-  # plugin folder - the roadmap called this the "SQLite" item, but the plugin
-  # ships no shaded libraries and Paper bundles no JDBC driver, so flat-file
-  # keeps the "just works on a fresh server" promise. It lives behind one
-  # manager, so a real database backend can replace the file later without a
-  # config change.
-  enabled: false
+  # Alchemist progression (1.3). Set false and a 1.2 server behaves
+  # identically - this test-friendly config ships it ON (see below). When
+  # enabled, the plugin remembers which recipes each player has brewed and
+  # keeps a few counters for the journal's lab-notes page. Storage is a flat
+  # progress.yml in the plugin folder - the roadmap called this the "SQLite"
+  # item, but the plugin ships no shaded libraries and Paper bundles no JDBC
+  # driver, so flat-file keeps the "just works on a fresh server" promise. It
+  # lives behind one manager, so a real database backend can replace the file
+  # later without a config change.
+  #
+  # ON by default in this test-friendly config so discovery, the journal's
+  # notes page and the per-player counters all populate as you play. Set
+  # false for the 1.2 behaviour (no tracking; journal becomes a plain
+  # cookbook of every recipe).
+  enabled: true
   # The /potioncombine journal book. Three modes: discovery (what you've
   # found), reference (ingredients for discovered recipes), notes (your
   # tallies). With progression off, the journal still opens as a plain
@@ -195,18 +211,20 @@ display:
         - { name: POOF,        count: 8,  offset_x: 0.25, offset_y: 0.15, offset_z: 0.25, speed: 0.01 }
 
 pollution:
-  # Off by default. Flip enabled to true once you want consequences. When
-  # disabled, none of the values below matter — no idle particles, no
-  # threshold checks, nothing. Pure 1.0 behaviour.
-  enabled: false
-  # Threshold at which the cauldron refuses new ingredients.
-  threshold: 15
+  # ON by default in this test-friendly config so the grime mechanic is
+  # visible without editing anything. Flip to false for pure 1.0 behaviour —
+  # when disabled, none of the values below matter (no idle particles, no
+  # threshold checks, nothing).
+  enabled: true
+  # Threshold at which the cauldron refuses new ingredients. Kept high so a
+  # tester can brew many times before having to scrub.
+  threshold: 20
   # How much pollution each outcome adds.
   per_success: 1
   per_fail: 2
   per_spoil: 3
   # Each point adds this much to the spoil-on-start roll. 0 disables.
-  # 0.01 = +1% per point, so a maxed (15) cauldron has a 15% spoil chance.
+  # 0.01 = +1% per point, so a maxed (20) cauldron has a 20% spoil chance.
   spoil_chance_per_point: 0.01
   # Each point multiplies brew time by this fraction on top of 1.0.
   # 0 = no slowdown, 0.05 = +5% per point.

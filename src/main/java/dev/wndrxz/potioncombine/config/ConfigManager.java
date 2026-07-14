@@ -18,7 +18,7 @@ public final class ConfigManager {
 
     private String localeRaw = "auto";
     private int    maxRecipes = 20;
-    private int    gracePeriodTicks = 20;
+    private int    gracePeriodTicks = 60;
     private boolean ingredientRetrieval = true;
     private int    cooldownSeconds = 0;
     private int    notifyRadius = 16;
@@ -63,11 +63,11 @@ public final class ConfigManager {
     private final ParticleConfig particles = new ParticleConfig();
     private final WorldFilter worldFilter = new WorldFilter();
 
-    private boolean pollutionEnabled = false;
+    private boolean pollutionEnabled = true;
     private int    pollutionPerSuccess = 1;
     private int    pollutionPerSpoil   = 3;
     private int    pollutionPerFail    = 2;
-    private int    pollutionThreshold  = 15;
+    private int    pollutionThreshold  = 20;
     private double pollutionSpoilChancePerPoint = 0.01;
     private double pollutionBrewTimeFactorPerPoint = 0.0;
 
@@ -78,10 +78,10 @@ public final class ConfigManager {
 
     private boolean hopperExtractEnabled = false;
 
-    private boolean synergyEnabled = false;
+    private boolean synergyEnabled = true;
     private int     synergyMaxHoldSeconds = 30;
 
-    private boolean progressionEnabled = false;
+    private boolean progressionEnabled = true;
     private boolean journalEnabled = true;
     private boolean restoreLiveBrews = true;
 
@@ -96,7 +96,7 @@ public final class ConfigManager {
 
         localeRaw          = root.getString("settings.locale", "auto");
         maxRecipes         = root.getInt("settings.max_recipes", 20);
-        gracePeriodTicks   = Math.max(1, root.getInt("settings.grace_period_ticks", 20));
+        gracePeriodTicks   = Math.max(1, root.getInt("settings.grace_period_ticks", 60));
         ingredientRetrieval = root.getBoolean("settings.ingredient_retrieval", true);
         cooldownSeconds    = Math.max(0, root.getInt("settings.cooldown_seconds", 0));
         notifyRadius       = Math.max(0, root.getInt("settings.notify_radius_blocks", 16));
@@ -138,11 +138,11 @@ public final class ConfigManager {
         particles.load(root.getConfigurationSection("display.particles"), plugin.getLogger());
         worldFilter.load(root.getConfigurationSection("settings.worlds"));
 
-        pollutionEnabled               = root.getBoolean("pollution.enabled", false);
+        pollutionEnabled               = root.getBoolean("pollution.enabled", true);
         pollutionPerSuccess            = Math.max(0, root.getInt("pollution.per_success", 1));
         pollutionPerSpoil              = Math.max(0, root.getInt("pollution.per_spoil",   3));
         pollutionPerFail               = Math.max(0, root.getInt("pollution.per_fail",    2));
-        pollutionThreshold             = Math.max(1, root.getInt("pollution.threshold",  15));
+        pollutionThreshold             = Math.max(1, root.getInt("pollution.threshold",  20));
         pollutionSpoilChancePerPoint   = clamp01(root.getDouble("pollution.spoil_chance_per_point", 0.01));
         pollutionBrewTimeFactorPerPoint = Math.max(0.0, root.getDouble("pollution.brew_time_factor_per_point", 0.0));
 
@@ -153,10 +153,10 @@ public final class ConfigManager {
 
         hopperExtractEnabled = root.getBoolean("automation.hopper_extract", false);
 
-        synergyEnabled        = root.getBoolean("synergy.enabled", false);
+        synergyEnabled        = root.getBoolean("synergy.enabled", true);
         synergyMaxHoldSeconds = Math.max(0, root.getInt("synergy.max_hold_seconds", 30));
 
-        progressionEnabled = root.getBoolean("progression.enabled", false);
+        progressionEnabled = root.getBoolean("progression.enabled", true);
         journalEnabled     = root.getBoolean("progression.journal_enabled", true);
         restoreLiveBrews   = root.getBoolean("progression.restore_live_brews", true);
 

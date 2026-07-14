@@ -43,6 +43,7 @@ command:
   help_give: "<gray>/potioncombine give <player> <recipe_id> [amount] <dark_gray>— spawn a finished potion"
   help_help: "<gray>/potioncombine help <dark_gray>— this list"
   help_info: "<gray>/potioncombine info <dark_gray>— version, recipe count, hooks"
+  help_journal: "<gray>/potioncombine journal [discovery|reference|notes] <dark_gray>— open your journal"
   info_version: "<gray>Version: <white><version></white>"
   info_recipes: "<gray>Recipes loaded: <white><count></white>"
   info_brews:   "<gray>Active brews: <white><count></white>"

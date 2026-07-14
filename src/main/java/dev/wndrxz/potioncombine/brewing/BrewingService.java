@@ -218,10 +218,10 @@ public final class BrewingService {
         }
         // Anyone standing near the cauldron needs to know too — silent fails
         // are confusing when no chat ping reaches the player who walked away.
-        // Skip if the only player we'd notify is the same one we already
-        // pinged directly (single-player setups, brewer at the cauldron).
-        plugin.locale().broadcastNearby(centre,
-                plugin.configManager().notifyRadius(), key2);
+        // Exclude the player we already pinged directly so they never receive
+        // the failure line twice (single-player setups, brewer at the cauldron).
+        plugin.locale().broadcastNearbyExcept(centre,
+                plugin.configManager().notifyRadius(), notify, key2);
 
         // Failures dirty the cauldron more than successes do. Water-loss is
         // "not your fault" and does not add pollution.
