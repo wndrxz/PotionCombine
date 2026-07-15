@@ -5,7 +5,7 @@ into a water cauldron, wait out a short grace period, and if the pile
 matches a recipe the cauldron brews it: bubbles, a progress bar over
 the water, a spinning bottle to grab at the end. No GUIs, no NMS.
 
-Status: 1.3.0.
+Status: 1.3.1. Live-tested on Paper 1.20.4.
 
 ## Requirements
 
@@ -22,7 +22,8 @@ Status: 1.3.0.
    sludge after the grace period
 4. right-click the hovering bottle when it's done, don't let it spoil
 
-Extras, each behind its own toggle in config.yml:
+Extras, each behind its own toggle (the bundled config ships with most
+of them on, gently tuned):
 
 - pollution: brews leave grime, a filthy cauldron refuses to work until
   scrubbed with a brush
@@ -43,8 +44,8 @@ recipes (phoenix_crown wants a brewed phoenix_elixir). Locales: en, ru.
 ## Build
 
 `./gradlew build` — the jar lands in `build/libs/`.
-`./gradlew test` — four suites (matcher, heat math, synergy, player
-progress) against the real paper classpath.
+`./gradlew test` — five suites (matcher, heat math, synergy, player
+progress, locale parity) against the real paper classpath.
 
 ## Data files
 

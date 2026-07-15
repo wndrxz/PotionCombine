@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "dev.wndrxz"
-version = "1.3.0"
+version = "1.3.1"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
@@ -21,27 +21,16 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.11.6")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
-    // Исправление для Gradle 9.0+: явный запуск платформы JUnit
+    // Gradle 9 wants the platform launcher on the test runtime classpath.
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+// The tests compile against the same Paper API the plugin does — the
+// matcher touches Material and PotionType and mocking those is worse
+// than just having them on the classpath.
 configurations {
-    // Paper API is needed at test runtime too so the matcher tests
-    // can touch Material / PotionType enums.
-    testImplementation { extendsFrom(configurations.compileOnly.get()) }
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    options.encoding = "UTF-8"
-    options.release.set(17)
-}
-
-tasks.processResources {
-    val props = mapOf("version" to project.version)
-    inputs.properties(props)
-    filteringCharset = "UTF-8"
-    filesMatching("plugin.yml") {
-        expand(props)
+    testImplementation {
+        extendsFrom(configurations.compileOnly.get())
     }
 }
 
@@ -49,7 +38,13 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.processResources {
+    // plugin.yml is the only resource with ${version} in it.
+    filesMatching("plugin.yml") {
+        expand("version" to project.version)
+    }
+}
+
 tasks.jar {
     archiveBaseName.set("PotionCombine")
-    archiveClassifier.set("")
 }

@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.3.1 — 2026-07-15
+
+Patch after a live server pass. fixes first.
+
+- restarting no longer duplicates ingredients: state.yml kept a copy of
+  what onDisable had already dropped on the floor
+- a resumed brew is pruned from state.yml as soon as it resumes, so a
+  crash right after boot can't replay it into free potions
+- en.yml shipped without command.help_journal (ru had it), english
+  players saw the raw key in /pc help
+- the player who caused a failed brew saw the message twice, direct
+  plus area broadcast. now once
+- grace period default 20 -> 60 ticks, room to load multi-item recipes
+- the bundled config is test-friendly now: pollution, synergy,
+  progression and area heat ship ON with gentle values. hopper extract
+  and the cooldown stay off
+- LocaleParityTest keeps en and ru key-for-key in sync
+
 ## 1.3 — 2026-06-26
 
 The plugin stops forgetting things between restarts.
