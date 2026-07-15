@@ -34,7 +34,7 @@ import java.util.Map;
  * exactly the upstream's output holds instead of failing while a neighbour
  * is still brewing.
  *
- * Horizontal neighbours only. Off by default.
+ * Horizontal neighbours only.
  */
 public final class SynergyManager {
 
@@ -88,8 +88,7 @@ public final class SynergyManager {
         if (plugin.pollutionManager().isBlocked(targetKey)) return false;
 
         CauldronSession ts = plugin.cauldronManager().get(targetKey);
-        // The event handler may have changed the world between the scan and
-        // now; re-check rather than trust the earlier snapshot.
+        // re-check after the event: handlers can mutate the world under us
         if (ts != null && ts.state() != CauldronSession.State.COLLECTING) return false;
         if (!wouldComplete(ts, key)) return false;
         if (ts == null) ts = plugin.cauldronManager().getOrCreate(target);

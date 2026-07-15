@@ -40,14 +40,13 @@ public final class CauldronSession {
     public State state() { return state; }
     public void state(State s) { this.state = s; }
 
-    /** Push to top of the LIFO stack. */
     public void addIngredient(ItemStack item) { ingredients.push(item); }
-    /** Pop the most-recently-added item, or null if empty. */
+    /** Pop the most recently added item, or null if empty. */
     public ItemStack popIngredient() { return ingredients.isEmpty() ? null : ingredients.pop(); }
     public boolean isEmpty() { return ingredients.isEmpty(); }
     public int ingredientCount() { return ingredients.size(); }
 
-    /** Snapshot view for the matcher. Top-of-stack first. */
+    // snapshot for the matcher, top-of-stack first
     public List<ItemStack> ingredientsSnapshot() {
         return new ArrayList<>(ingredients);
     }

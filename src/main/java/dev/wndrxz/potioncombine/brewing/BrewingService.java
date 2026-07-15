@@ -39,8 +39,7 @@ public final class BrewingService {
     }
 
     public void onIngredientAdded(CauldronSession session, Player adder) {
-        // A fresh ingredient is progress — restart any upstream-wait patience.
-        session.holdingSinceMillis(0L);
+        session.holdingSinceMillis(0L); // new ingredient = progress, reset the upstream-wait timer
         ItemMatcher matcher = plugin.itemMatcher();
         Map<IngredientKey, Integer> counts = matcher.countItems(session.ingredientsSnapshot());
         ItemMatcher.MatchResult res = matcher.matchKeys(counts, plugin.recipeManager().all());
@@ -73,11 +72,9 @@ public final class BrewingService {
         }
     }
 
-    /** A downstream cauldron that is short exactly an upstream brew's output
-     *  should not fail the instant its grace runs out — the upstream may
-     *  still be cooking. While a neighbour is brewing, re-check each grace
-     *  period up to the configured ceiling, then give up and let the caller
-     *  fail it normally. Returns true while the hold is still in effect. */
+    // A downstream cauldron that's short exactly an upstream brew's output shouldn't
+    // fail the instant grace runs out, the upstream may still be cooking. Re-check
+    // every grace period up to the configured cap. Returns true while the hold is on.
     private boolean tryHoldForUpstream(CauldronSession session,
                                        Map<IngredientKey, Integer> counts,
                                        Player adder) {
@@ -119,9 +116,8 @@ public final class BrewingService {
             return;
         }
 
-        // Roll the pollution-driven spoil chance up front, softened by any
-        // heat source under the cauldron — better to tell the player "no"
-        // before they sit through a brew cycle than at the end.
+        // roll the spoil chance up front (heat softens it); failing fast beats
+        // failing after the player sat through a whole cycle
         double chance = plugin.pollutionManager().spoilChance(key);
         HeatSourceManager.Source heat = plugin.heatSourceManager().resolve(key);
         if (chance > 0.0 && !heat.isNone()) {
@@ -209,17 +205,12 @@ public final class BrewingService {
         };
         if (notify != null && notify.isOnline()) {
             plugin.locale().send(notify, key2);
-            // A failure we can pin on a player (the one who triggered the
-            // grace check) counts toward their lab-notes tally. Water-loss is
-            // nobody's fault, so it does not.
+            // water-loss is nobody's fault; everything else lands in the lab-notes tally
             if (reason != FailureReason.WATER_LOST) {
                 plugin.progressManager().recordFailed(notify.getUniqueId());
             }
         }
-        // Anyone standing near the cauldron needs to know too — silent fails
-        // are confusing when no chat ping reaches the player who walked away.
-        // Exclude the player we already pinged directly so they never receive
-        // the failure line twice (single-player setups, brewer at the cauldron).
+        // ping bystanders too, minus the player we already messaged directly
         plugin.locale().broadcastNearbyExcept(centre,
                 plugin.configManager().notifyRadius(), notify, key2);
 
@@ -281,9 +272,7 @@ public final class BrewingService {
             plugin.locale().send(player, "cauldron.collect_success",
                     LocaleManager.component("recipe", recipeName));
 
-            // Progression: the collecting player is the one credited with the
-            // brew (and any first-time discovery), not whoever happened to drop
-            // the last ingredient. Fired only on a real, non-spoiled result.
+            // credit goes to whoever collects, not whoever dropped the last ingredient
             String recipeId = session.matched() != null ? session.matched().id() : null;
             boolean firstTime = plugin.progressManager().recordBrew(player.getUniqueId(), recipeId);
             if (firstTime) {
@@ -395,8 +384,7 @@ public final class BrewingService {
         }
     }
 
-    /** The persisted ingredient list is top-of-stack first; pushing it back in
-     *  reverse restores the LIFO order a player's retrieve relies on. */
+    // persisted list is top-of-stack first; push it back reversed so retrieve keeps LIFO order
     private static java.util.List<ItemStack> reversed(java.util.List<ItemStack> in) {
         java.util.List<ItemStack> out = new java.util.ArrayList<>(in);
         java.util.Collections.reverse(out);

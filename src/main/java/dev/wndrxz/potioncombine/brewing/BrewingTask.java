@@ -42,10 +42,8 @@ public final class BrewingTask extends BukkitRunnable {
         this(plugin, session, recipe, world, centre, totalBrewTicks, spoilTicks, 0, Phase.BREWING, 0);
     }
 
-    /** Resume constructor. {@code startTicks} is how far the brew had already
-     *  progressed; {@code startPhase} and {@code readyElapsedStart} pick up a
-     *  finished-but-uncollected result mid-spoil. Used only by the state-store
-     *  restore path on boot — a fresh brew always starts at zero. */
+    // resume constructor, only used by the state-store restore path on boot;
+    // a fresh brew always starts at zero
     public BrewingTask(PotionCombine plugin, CauldronSession session, Recipe recipe,
                        World world, Location centre, int totalBrewTicks, int spoilTicks,
                        int startTicks, Phase startPhase, int readyElapsedStart) {
@@ -162,9 +160,7 @@ public final class BrewingTask extends BukkitRunnable {
             return;
         }
 
-        // No hopper took it — see if an adjacent cauldron is waiting on this
-        // result to finish a higher-tier recipe. If so the bottle pours
-        // straight in instead of hovering.
+        // no hopper took it; maybe a neighbouring cauldron is waiting on this result
         if (plugin.synergyManager().feed(world,
                 centre.getBlockX(), centre.getBlockY(), centre.getBlockZ(), recipe, result)) {
             plugin.cauldronManager().cancelAllTasks(session);
