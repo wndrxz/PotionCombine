@@ -12,19 +12,14 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 /**
- * Alchemist progression — who has discovered what, and the counters the
- * journal's lab-notes page reads off. The roadmap pencilled this in as the
- * "SQLite progression" item; the storage here is the same flat-file approach
- * the 1.1 pollution state already uses, kept deliberately behind this one
- * manager so a real SQLite backend can replace {@code progress.yml} later
- * without touching a single caller. We do not bundle a JDBC driver: the
- * plugin's standing rule is no shaded libraries, and Paper ships none, so
- * pulling SQLite in now would mean either shading (forbidden) or a hard
- * runtime dependency the operator has to install. Flat-file keeps the
- * promise that a fresh server "just works".
+ * Alchemist progression: discoveries plus the counters the journal's lab-notes
+ * page reads. Storage is the same flat-file approach the pollution state uses,
+ * kept behind this one manager so an SQLite backend can replace progress.yml
+ * later without touching callers. No bundled JDBC driver (no-shading rule),
+ * hence flat-file for now.
  *
- * Everything off by default — with {@code progression.enabled: false} nothing
- * is tracked, no file is written, and the journal command politely says so.
+ * With {@code progression.enabled: false} nothing is tracked, no file is
+ * written, and the journal command politely says so.
  */
 public final class ProgressManager {
 

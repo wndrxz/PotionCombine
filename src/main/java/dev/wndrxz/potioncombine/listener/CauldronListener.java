@@ -46,15 +46,12 @@ public final class CauldronListener implements Listener {
         Action action = event.getAction();
         boolean sneaking = player.isSneaking();
 
-        // Check for ready/spoiled brew collection FIRST, before any other
-        // interactions. This prevents vanilla cauldron behavior (filling
-        // bottles, bucket interactions) from interfering with potion pickup.
+        // collection has to win over vanilla bottle/bucket handling, so it goes first
         if (action == Action.RIGHT_CLICK_BLOCK && !sneaking) {
             CauldronSession s = plugin.cauldronManager().get(block);
             if (s != null && (s.state() == CauldronSession.State.READY
                     || s.state() == CauldronSession.State.SPOILED)) {
-                // Cancel immediately to prevent ANY vanilla interaction.
-                event.setCancelled(true);
+                event.setCancelled(true); // before vanilla gets a chance
                 plugin.brewingService().collectReady(s, player);
                 return;
             }

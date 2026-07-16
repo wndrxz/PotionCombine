@@ -199,6 +199,7 @@ public final class RecipeManager {
         };
     }
 
+    // TODO: move to setBasePotionType() once we drop 1.20.4 support
     @SuppressWarnings("deprecation") // PotionData is 1.20.4 surface
     private ItemStack buildResult(Recipe recipe) {
         ItemStack stack = new ItemStack(Material.POTION, 1);

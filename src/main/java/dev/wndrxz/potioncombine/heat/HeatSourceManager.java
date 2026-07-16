@@ -153,7 +153,7 @@ public final class HeatSourceManager {
     public boolean enabled() { return enabled; }
 
     private void applyDefaults() {
-        // A modest, sane default set. Operators will tune to taste.
+        // defaults, operators will tune to taste
         sources.put(Material.CAMPFIRE,      new Source(0.85, 0.0));
         sources.put(Material.SOUL_CAMPFIRE, new Source(0.75, 0.20));
         sources.put(Material.MAGMA_BLOCK,   new Source(0.90, 0.0));

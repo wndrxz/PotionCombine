@@ -41,7 +41,7 @@ public final class ItemMatcher {
 
     public MatchResult matchKeys(Map<IngredientKey, Integer> counts, Collection<Recipe> recipes) {
         if (counts.isEmpty()) {
-            // Empty cauldron — could still grow into anything.
+            // empty cauldron can still grow into anything
             return new MatchResult(recipes.isEmpty() ? Result.NO_MATCH : Result.PARTIAL, null);
         }
         int totalCounts = totalOf(counts);
