@@ -6,7 +6,7 @@ group = "dev.wndrxz"
 version = "1.3.1"
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 repositories {
@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     // Soft-depend at runtime; we never bundle it.
     compileOnly("me.clip:placeholderapi:2.11.6")
 

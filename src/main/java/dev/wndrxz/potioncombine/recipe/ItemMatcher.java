@@ -96,13 +96,8 @@ public final class ItemMatcher {
         return IngredientKey.item(mat);
     }
 
-    @SuppressWarnings("deprecation") // 1.20.4 API; 1.20.5+ adds getBasePotionType()
     private static PotionType readBasePotionType(PotionMeta pm) {
-        try {
-            return pm.getBasePotionData() != null ? pm.getBasePotionData().getType() : null;
-        } catch (Throwable ignored) {
-            return null;
-        }
+        return pm.getBasePotionType();
     }
 
     private static int totalOf(Map<IngredientKey, Integer> m) {

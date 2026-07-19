@@ -13,7 +13,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
@@ -189,29 +188,25 @@ public final class RecipeManager {
 
     private static String normalizePotionType(String raw) {
         String s = raw.trim().toUpperCase(Locale.ROOT);
+        // the enum got renamed in 1.20.5 — keep the old spellings alive so
+        // nobody's recipes.yml breaks on upgrade
         return switch (s) {
-            case "HEALING" -> "INSTANT_HEAL";
-            case "HARMING" -> "INSTANT_DAMAGE";
-            case "REGENERATION" -> "REGEN";
-            case "LEAPING" -> "JUMP";
-            case "SWIFTNESS" -> "SPEED";
+            case "INSTANT_HEAL" -> "HEALING";
+            case "INSTANT_DAMAGE" -> "HARMING";
+            case "REGEN" -> "REGENERATION";
+            case "JUMP" -> "LEAPING";
+            case "SPEED" -> "SWIFTNESS";
             default -> s;
         };
     }
 
-    // TODO: move to setBasePotionType() once we drop 1.20.4 support
-    @SuppressWarnings("deprecation") // PotionData is 1.20.4 surface
     private ItemStack buildResult(Recipe recipe) {
         ItemStack stack = new ItemStack(Material.POTION, 1);
         PotionMeta meta = (PotionMeta) stack.getItemMeta();
         if (meta == null) return stack;
 
-        try {
-            PotionType base = recipe.basePotion() == null ? PotionType.AWKWARD : recipe.basePotion();
-            meta.setBasePotionData(new PotionData(base, false, false));
-        } catch (Throwable ignored) {
-            // Some 1.21 builds restrict PotionData — safe to ignore, custom effects still apply.
-        }
+        PotionType base = recipe.basePotion() == null ? PotionType.AWKWARD : recipe.basePotion();
+        meta.setBasePotionType(base);
 
         Component name = legacy.deserialize(recipe.displayNameLegacy())
                 .decoration(TextDecoration.ITALIC, false);
