@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "dev.wndrxz"
-version = "1.3.1"
+version = "1.4-SNAPSHOT"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))

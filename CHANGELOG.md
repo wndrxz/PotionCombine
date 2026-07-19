@@ -1,5 +1,17 @@
 # Changelog
 
+## unreleased
+
+Start of the 1.4 line.
+
+- now targets paper 1.21+, 1.20.x support dropped. setBasePotionData
+  went with it — results use setBasePotionType, which closes the
+  oldest TODO in the codebase
+- old PotionType spellings in recipes.yml (INSTANT_HEAL, REGEN, JUMP,
+  SPEED) still work, they map onto the renamed enum
+- builds with java 21 now, gradle fetches one itself if the machine
+  doesn't have it
+
 ## 1.3.1 — 2026-07-15
 
 Patch after a live server pass. fixes first.
