@@ -34,11 +34,19 @@ configurations {
     }
 }
 
+// Compile sources as UTF-8 regardless of the platform default, otherwise
+// non-ASCII literals (the journal's "• " bullet) come out mangled on
+// machines whose default charset isn't UTF-8.
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
+}
+
 tasks.test {
     useJUnitPlatform()
 }
 
 tasks.processResources {
+    filteringCharset = "UTF-8"
     // plugin.yml is the only resource with ${version} in it.
     filesMatching("plugin.yml") {
         expand("version" to project.version)
