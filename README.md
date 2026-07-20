@@ -5,8 +5,8 @@ into a water cauldron, wait out a short grace period, and if the pile
 matches a recipe the cauldron brews it: bubbles, a progress bar over
 the water, a spinning bottle to grab at the end. No GUIs, no NMS.
 
-Status: 1.4 in the works, now targeting Paper 1.21. Still on 1.20.x?
-Grab 1.3.1 — the last release built for it, live-tested there.
+Status: 1.4 is out, targeting Paper 1.21. Still on 1.20.x? Grab
+1.3.1 — the last release built for it, live-tested there.
 
 ## Requirements
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## 1.4 — 2026-07-20
 
 Start of the 1.4 line.
 
@@ -11,6 +11,9 @@ Start of the 1.4 line.
   SPEED) still work, they map onto the renamed enum
 - builds with java 21 now, gradle fetches one itself if the machine
   doesn't have it
+- /pc journal: the "•" line marker rendered as mojibake — the build
+  had lost its utf-8 source encoding, so the bullet literal was read
+  in the platform charset. put the encoding back, it renders again
 
 ## 1.3.1 — 2026-07-15
 
