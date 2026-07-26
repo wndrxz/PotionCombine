@@ -1,5 +1,9 @@
 # Changelog
 
+## unreleased
+
+Start of the 1.5 line: folia. The roadmap explains the shape.
+
 ## 1.4 — 2026-07-20
 
 Start of the 1.4 line.
